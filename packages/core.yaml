@@ -177,9 +177,9 @@ select:
     id: vswing
     entity_category: config
     options:
-      - "From top to bottom"
-      - "In the upper half"
-      - "In the lower half"
+      - "Cima a Baixo"
+      - "Meio para Cima"
+      - "Meio para Baixo"
     optimistic: true
     restore_value: true
     set_action:
@@ -199,10 +199,10 @@ select:
     id: hswing
     entity_category: config
     options:
-      - "From left to right"
-      - "In the left part"
-      - "In the center"
-      - "In the right part"
+      - "Esquerda para Direita"
+      - "Na Esquerda"
+      - "No Centro"
+      - "Na Direita"
     optimistic: true
     restore_value: true
     set_action:
@@ -255,12 +255,12 @@ select:
     id: hfixing
     entity_category: config
     options:
-      - "Last position"
-      - "Until left stop"
-      - "In the left half"
-      - "In the middle"
-      - "In the right half"
-      - "Until right stop"
+      - "Ultima Configuração"
+      - "Esquerda"
+      - "Esquerda-Centro"
+      - "Centro"
+      - "Direita-Centro"
+      - "Direita"
     optimistic: true
     restore_value: true
     set_action:
