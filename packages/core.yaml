@@ -173,7 +173,7 @@ switch:
 select:
   # Настройка вертикального качания
   - platform: template
-    name: Vertical swing
+    name: Balanço Vertical
     id: vswing
     entity_category: config
     options:
@@ -195,7 +195,7 @@ select:
 
   # Настройка горизонтального качания
   - platform: template
-    name: Horizontal swing
+    name: Balanço Horizontal
     id: hswing
     entity_category: config
     options:
@@ -220,7 +220,7 @@ select:
 
   # Настройка фиксации вертикальной заслонки
   - platform: template
-    name: Vertical fixing
+    name: Posição Vertical
     id: vfixing
     entity_category: config
     options:
@@ -251,7 +251,7 @@ select:
 
   # Настройка фиксации горизонатальных заслонок
   - platform: template
-    name: Horizontal fixing
+    name: Posição Horizontal
     id: hfixing
     entity_category: config
     options:
