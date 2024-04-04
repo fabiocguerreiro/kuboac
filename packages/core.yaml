@@ -224,12 +224,12 @@ select:
     id: vfixing
     entity_category: config
     options:
-      - Last
-      - Max_Up
-      - Up
-      - Center
-      - Down
-      - Max_Down
+      - Ultima Configuração
+      - Máximo
+      - Cima
+      - Centro
+      - Baixo
+      - Minimo
     optimistic: true
     restore_value: true
     set_action:
