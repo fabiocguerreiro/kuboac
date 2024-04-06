@@ -20,7 +20,6 @@ from esphome.components.climate import (
 )
 
 AUTO_LOAD = ["climate"]
-CODEOWNERS = ["@I-am-nightingale"]
 DEPENDENCIES = ["climate", "uart"]
 CONF_RX_LED = "rx_led"
 CONF_TX_LED = "tx_led"
@@ -35,7 +34,7 @@ tclac_ns = cg.esphome_ns.namespace("tclac")
 tclacClimate = tclac_ns.class_("tclacClimate", uart.UARTDevice, climate.Climate, cg.PollingComponent)
 
 SUPPORTED_FAN_MODES_OPTIONS = {
-    "AUTO": ClimateMode.CLIMATE_FAN_AUTO,  # Доступен всегда
+    "AUTO": ClimateMode.CLIMATE_FAN_AUTO,  # Always available
     "QUIET": ClimateMode.CLIMATE_FAN_QUIET,
     "LOW": ClimateMode.CLIMATE_FAN_LOW,
     "MIDDLE": ClimateMode.CLIMATE_FAN_MIDDLE,
@@ -46,15 +45,15 @@ SUPPORTED_FAN_MODES_OPTIONS = {
 }
 
 SUPPORTED_SWING_MODES_OPTIONS = {
-    "OFF": ClimateSwingMode.CLIMATE_SWING_OFF,  # Доступен всегда
+    "OFF": ClimateSwingMode.CLIMATE_SWING_OFF,  # Always available
     "VERTICAL": ClimateSwingMode.CLIMATE_SWING_VERTICAL,
     "HORIZONTAL": ClimateSwingMode.CLIMATE_SWING_HORIZONTAL,
     "BOTH": ClimateSwingMode.CLIMATE_SWING_BOTH,
 }
 
 SUPPORTED_CLIMATE_MODES_OPTIONS = {
-    "OFF": ClimateMode.CLIMATE_MODE_OFF,  # Доступен всегда
-    "AUTO": ClimateMode.CLIMATE_MODE_AUTO,  # Доступен всегда
+    "OFF": ClimateMode.CLIMATE_MODE_OFF,  # Always available
+    "AUTO": ClimateMode.CLIMATE_MODE_AUTO,  # Always available
     "COOL": ClimateMode.CLIMATE_MODE_COOL,
     "HEAT": ClimateMode.CLIMATE_MODE_HEAT,
     "DRY": ClimateMode.CLIMATE_MODE_DRY,
@@ -128,7 +127,7 @@ HorizontalSwingDirectionAction = tclac_ns.class_("HorizontalSwingDirectionAction
 
 TCLAC_ACTION_BASE_SCHEMA = automation.maybe_simple_id({cv.GenerateID(CONF_ID): cv.use_id(tclacClimate),})
 
-# Регистрация событий включения и отключения дисплея кондиционера
+# Event registration for turning on and off the air conditioner display
 @automation.register_action(
     "climate.tclac.display_on", DisplayOnAction, cv.Schema
 )
@@ -140,7 +139,7 @@ async def display_action_to_code(config, action_id, template_arg, args):
     var = cg.new_Pvariable(action_id, template_arg, paren)
     return var
 
-# Регистрация событий включения и отключения пищалки кондиционера
+# Event registration for turning on and off the air conditioner buzzer
 @automation.register_action(
     "climate.tclac.beeper_on", BeeperOnAction, cv.Schema
 )
@@ -152,7 +151,7 @@ async def beeper_action_to_code(config, action_id, template_arg, args):
     var = cg.new_Pvariable(action_id, template_arg, paren)
     return var
 
-# Регистрация событий включения и отключения светодиодов связи модуля
+# Event registration for turning on and off the communication LEDs of the module
 @automation.register_action(
     "climate.tclac.module_display_on", ModuleDisplayOnAction, cv.Schema
 )
@@ -164,7 +163,7 @@ async def module_display_action_to_code(config, action_id, template_arg, args):
     var = cg.new_Pvariable(action_id, template_arg, paren)
     return var
 
-# Регистрация события установки вертикальной фиксации заслонки
+# Event registration for setting the vertical vent fixation
 @automation.register_action(
     "climate.tclac.set_vertical_airflow",
     VerticalAirflowAction,
@@ -185,7 +184,7 @@ async def tclac_set_vertical_airflow_to_code(config, action_id, template_arg, ar
     return var
 
 
-# Регистрация события установки горизонтальной фиксации заслонок
+# Event registration for setting the horizontal vent fixation
 @automation.register_action(
     "climate.tclac.set_horizontal_airflow",
     HorizontalAirflowAction,
@@ -204,7 +203,7 @@ async def tclac_set_horizontal_airflow_to_code(config, action_id, template_arg, 
     return var
 
 
-# Регистрация события установки вертикального качания шторки
+# Event registration for setting the vertical swing of the vent
 @automation.register_action(
     "climate.tclac.set_vertical_swing_direction",
     VerticalSwingDirectionAction,
@@ -223,7 +222,7 @@ async def tclac_set_vertical_swing_direction_to_code(config, action_id, template
     return var
 
 
-# Регистрация события установки горизонтального качания шторок
+# Event registration for setting the horizontal swing of the vent
 @automation.register_action(
     "climate.tclac.set_horizontal_swing_direction",
     HorizontalSwingDirectionAction,
@@ -242,7 +241,7 @@ async def tclac_set_horizontal_swing_direction_to_code(config, action_id, templa
     return var
 
 
-# Добавление конфигурации в код
+# Adding configuration to the code
 def to_code(config):
     var = cg.new_Pvariable(config[CONF_ID])
     yield cg.register_component(var, config)
