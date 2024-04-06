@@ -1,9 +1,3 @@
-/**
-* Create by Miguel Ángel López on 20/07/19
-* and modify by xaxexa
-* Refactoring & component making:
-* Соловей с паяльником 15.03.2024
-**/
 
 #ifndef TCL_ESP_TCL_H
 #define TCL_ESP_TCL_H
@@ -92,13 +86,13 @@ class tclacClimate : public climate::Climate, public esphome::uart::UARTDevice, 
 
 	private:
 		byte checksum;
-		// dataTX с управлением состоит из 38 байт
+		// dataTX with control consists of 38 bytes
 		byte dataTX[38];
-		// А dataRX по прежнему из 61 байта
+		// And dataRX remains at 61 bytes
 		byte dataRX[61];
-		// Команда запроса состояния
+		// State query command
 		byte poll[8] = {0xBB,0x00,0x01,0x04,0x02,0x01,0x00,0xBD};
-		// Инициализация и начальное наполнение переменных состоянй переключателей
+		// Initialization and initial filling of switch state variables
 		bool beeper_status_;
 		bool display_status_;
 		bool module_display_status_;
@@ -120,7 +114,7 @@ class tclacClimate : public climate::Climate, public esphome::uart::UARTDevice, 
 		static byte getChecksum(const byte * message, size_t size);
 		void control(const ClimateCall &call) override; // Climate control
 		
-		// Заготовки функций запроса состояния, может пригодиться в будущем, если делать обратную связь. Очень не хочется, будет очень костыльно.
+		// Function templates for querying state, might be useful in the future if feedback is implemented. Really don't want to, it will be very cumbersome.
 		
 		//bool get_beeper_state() const;
 		//bool get_display_state() const;
