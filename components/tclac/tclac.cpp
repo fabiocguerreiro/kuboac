@@ -176,7 +176,7 @@ void tclacClimate::readData() {
 	} else {
 		// If the air conditioner is turned off, then all modes are displayed as off
 		mode = climate::CLIMATE_MODE_OFF;
-		fan_mode = climate::CLIMATE_FAN_OFF;
+		fan_mode = climate::CLIMATE_FAN_AUTO;
 		swing_mode = climate::CLIMATE_SWING_OFF;
 	}
 	// Publish the data
