@@ -151,18 +151,6 @@ async def beeper_action_to_code(config, action_id, template_arg, args):
     var = cg.new_Pvariable(action_id, template_arg, paren)
     return var
 
-# Event registration for turning on and off the communication LEDs of the module
-@automation.register_action(
-    "climate.tclac.module_display_on", ModuleDisplayOnAction, cv.Schema
-)
-@automation.register_action(
-    "climate.tclac.module_display_off", ModuleDisplayOffAction, cv.Schema
-)
-async def module_display_action_to_code(config, action_id, template_arg, args):
-    paren = await cg.get_variable(config[CONF_ID])
-    var = cg.new_Pvariable(action_id, template_arg, paren)
-    return var
-
 # Event registration for setting the vertical vent fixation
 @automation.register_action(
     "climate.tclac.set_vertical_airflow",
@@ -260,12 +248,3 @@ def to_code(config):
         cg.add(var.set_supported_fan_modes(config[CONF_SUPPORTED_FAN_MODES]))
     if CONF_SUPPORTED_SWING_MODES in config:
         cg.add(var.set_supported_swing_modes(config[CONF_SUPPORTED_SWING_MODES]))
-
-    if CONF_TX_LED in config:
-        cg.add_define("CONF_TX_LED")
-        tx_led_pin = yield cg.gpio_pin_expression(config[CONF_TX_LED])
-        cg.add(var.set_tx_led_pin(tx_led_pin))
-    if CONF_RX_LED in config:
-        cg.add_define("CONF_RX_LED")
-        rx_led_pin = yield cg.gpio_pin_expression(config[CONF_RX_LED])
-        cg.add(var.set_rx_led_pin(rx_led_pin))
