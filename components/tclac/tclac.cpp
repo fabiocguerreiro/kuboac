@@ -217,13 +217,15 @@ void tclacClimate::control(const ClimateCall &call) {
 	
 	// CAUTION! When turning off the display, the air conditioner forcibly switches to automatic mode!
 	
-	if ((display_status_) && (switchvar != climate::CLIMATE_MODE_OFF)){
-		ESP_LOGD("TCL", "Dispaly turn ON");
-		dataTX[7] += 0b01000000;
-	} else {
-		ESP_LOGD("TCL", "Dispaly turn OFF");
-		dataTX[7] += 0b00000000;
-	}
+	if (display_status_ && switchvar != climate::CLIMATE_MODE_OFF) {
+    ESP_LOGD("TCL", "Display turn ON");
+    // Turn on the display
+    dataTX[7] |= 0b01000000;
+} else {
+    ESP_LOGD("TCL", "Display turn OFF");
+    // Turn off the display
+    dataTX[7] &= ~0b01000000;
+}
 		
 	// Configure the operation mode of the air conditioner
 	switch (switchvar) {
