@@ -124,7 +124,7 @@ switch:
     device_class: switch
     id: beep_mode
     entity_category: config
-    restore_mode: RESTORE_DEFAULT_ON
+    restore_mode: RESTORE_DEFAULT_OFF
     optimistic: true
     on_turn_on:
       then:
@@ -158,7 +158,7 @@ switch:
     device_class: switch
     id: ledflash_mode
     entity_category: config
-    restore_mode: RESTORE_DEFAULT_ON
+    restore_mode: RESTORE_DEFAULT_OFF
     optimistic: true
     on_turn_on:
       then:
@@ -177,9 +177,9 @@ select:
     id: vswing
     entity_category: config
     options:
-      - "Cima a Baixo"
-      - "Meio para Cima"
-      - "Meio para Baixo"
+      - "UP<->DOWN"
+      - "UPSIDE"
+      - "DOWNSIDE"
     optimistic: true
     restore_value: true
     set_action:
@@ -199,10 +199,10 @@ select:
     id: hswing
     entity_category: config
     options:
-      - "Esquerda para Direita"
-      - "Na Esquerda"
-      - "No Centro"
-      - "Na Direita"
+      - "LEFT<->RIGHT"
+      - "LEFTSIDE"
+      - "CENTER"
+      - "RIGHTSIDE"
     optimistic: true
     restore_value: true
     set_action:
@@ -224,12 +224,12 @@ select:
     id: vfixing
     entity_category: config
     options:
-      - Ultima Configuração
-      - Máximo
-      - Cima
-      - Centro
-      - Baixo
-      - Minimo
+      - LAST CONFIG
+      - MAX UP
+      - UP
+      - CENTER
+      - DOWN
+      - MAX DOWN
     optimistic: true
     restore_value: true
     set_action:
@@ -255,12 +255,12 @@ select:
     id: hfixing
     entity_category: config
     options:
-      - "Ultima Configuração"
-      - "Esquerda"
-      - "Esquerda-Centro"
-      - "Centro"
-      - "Direita-Centro"
-      - "Direita"
+      - "LAST CONFIG"
+      - "MAX LEFT"
+      - "LEFT"
+      - "CENTER"
+      - "RIGHT"
+      - "MAX RIGHT"
     optimistic: true
     restore_value: true
     set_action:
