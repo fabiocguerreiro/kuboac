@@ -1,7 +1,3 @@
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-# # # # #                                      DO NOT EDIT  !!                                  # # # # #
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-
 # Component of climate:
 external_components:
   - source:
@@ -105,11 +101,6 @@ wifi:
     password: "${recovery_pass}"
 
 captive_portal:
-
-
-# # # # # # # # # # # # # # # # # # # # # # #
-# # # # #        DO NOT EDIT!       # # # # #
-# # # # # # # # # # # # # # # # # # # # # # #
 
 # Ensure logging through UART is DISABLED
 logger:
