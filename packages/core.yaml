@@ -25,11 +25,6 @@ esphome:
         } else {
           id(${device_name}climate).set_display_state(false);
         }
-        if (id(ledflash_mode).state){
-          id(${device_name}climate).set_module_display_state(true);
-        } else {
-          id(${device_name}climate).set_module_display_state(false);
-        }
 
         if (id(vswing).active_index() == 0){
           id(${device_name}climate).set_vertical_swing_direction(esphome::tclac::VerticalSwingDirection::UP_DOWN);
