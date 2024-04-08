@@ -217,16 +217,14 @@ void tclacClimate::control(const ClimateCall &call) {
 	
 	// CAUTION! When turning off the display, the air conditioner forcibly switches to automatic mode!
 	
-	if (display_status_ && switchvar != climate::CLIMATE_MODE_OFF) {
-    ESP_LOGD("TCL", "Display turn ON");
-    // Turn on the display
-    dataTX[7] |= 0b01000000;
-} else {
-    ESP_LOGD("TCL", "Display turn OFF");
-    // Turn off the display
-    dataTX[7] &= ~0b01000000;
-}
-		
+	if ((display_status_) && (switchvar != climate::CLIMATE_MODE_OFF)){
+		ESP_LOGD("TCL", "Dispaly turn ON");
+		dataTX[7] += 0b01000000;
+	} else {
+		ESP_LOGD("TCL", "Dispaly turn OFF");
+		dataTX[7] += 0b00000000;
+	}
+	
 	// Configure the operation mode of the air conditioner
 	switch (switchvar) {
 		case climate::CLIMATE_MODE_OFF:
@@ -524,7 +522,7 @@ void tclacClimate::sendData(byte * message, byte size) {
 	//Serial.write(message, size);
 	this->esphome::uart::UARTDevice::write_array(message, size);
 	auto raw = getHex(message, size);
-	ESP_LOGD("TCL", "Message to TCL sended...");
+	ESP_LOGD("TCL", "Comando para AC KUBO Enviado...");
 	tclacClimate::dataShow(1,0);
 }
 // Byte conversion to readable format
@@ -544,33 +542,6 @@ byte tclacClimate::getChecksum(const byte * message, size_t size) {
 		crc ^= message[i];
 	return crc;
 }
-// Flashing LEDs
-void tclacClimate::dataShow(bool flow, bool shine) {
-	if (module_display_status_){
-		if (flow == 0){
-			if (shine == 1){
-#ifdef CONF_RX_LED
-				this->rx_led_pin_->digital_write(true);
-#endif
-			} else {
-#ifdef CONF_RX_LED
-				this->rx_led_pin_->digital_write(false);
-#endif
-			}
-		}
-		if (flow == 1) {
-			if (shine == 1){
-#ifdef CONF_TX_LED
-				this->tx_led_pin_->digital_write(true);
-#endif
-			} else {
-#ifdef CONF_TX_LED
-				this->tx_led_pin_->digital_write(false);
-#endif
-			}
-		}
-	}
-}
 
 // Actions with data from the configuration
 
@@ -582,18 +553,6 @@ void tclacClimate::set_beeper_state(bool state) {
 void tclacClimate::set_display_state(bool state) {
 	this->display_status_ = state;
 }
-// Obtaining the data reception LED pin
-#ifdef CONF_RX_LED
-void tclacClimate::set_rx_led_pin(GPIOPin *rx_led_pin) {
-	this->rx_led_pin_ = rx_led_pin;
-}
-#endif
-// Obtaining the data transmission LED pin
-#ifdef CONF_TX_LED
-void tclacClimate::set_tx_led_pin(GPIOPin *tx_led_pin) {
-	this->tx_led_pin_ = tx_led_pin;
-}
-#endif
 // Obtaining the status of the module communication LEDs
 void tclacClimate::set_module_display_state(bool state) {
 	this->module_display_status_ = state;
