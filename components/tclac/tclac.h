@@ -107,7 +107,7 @@ class tclacClimate : public climate::Climate, public esphome::uart::UARTDevice, 
 		void setup() override;
 		void loop() override;
 		void update() override;
-		void takeControl();
+		void readData();
 		void dataShow(bool flow, bool shine);
 		void sendData(byte * message, byte size);
 		static String getHex(byte *message, byte size);
