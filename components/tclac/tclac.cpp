@@ -185,7 +185,12 @@ void tclacClimate::readData() {
 
 // Climate control
 void tclacClimate::control(const ClimateCall &call) {
-	
+	takeControl();
+}
+
+
+void tclacClimate::takeControl() {
+
 	uint8_t switchvar = 0;
 	
 	dataTX[7]  = 0b00000000;//eco,display,beep,ontimerenable, offtimerenable,power,0,0
@@ -577,6 +582,9 @@ void tclacClimate::dataShow(bool flow, bool shine) {
 // Obtaining the buzzer state
 void tclacClimate::set_beeper_state(bool state) {
 	this->beeper_status_ = state;
+	if (force_mode_status_){
+		tclacClimate::takeControl();
+	}
 }
 // Obtaining the air conditioner display state
 void tclacClimate::set_display_state(bool state) {
