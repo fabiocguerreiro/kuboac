@@ -14,17 +14,19 @@ ClimateTraits tclacClimate::traits() {
 	traits.set_supports_two_point_target_temperature(false);
 
 	traits.set_supported_modes(this->supported_modes_);
+	traits.set_supported_presets(this->supported_presets_);
 	traits.set_supported_fan_modes(this->supported_fan_modes_);
 	traits.set_supported_swing_modes(this->supported_swing_modes_);
+	
+	traits.add_supported_mode(climate::CLIMATE_MODE_OFF);		// Выключенный режим кондиционера доступен всегда
+	traits.add_supported_mode(climate::CLIMATE_MODE_AUTO);		// Автоматический режим кондиционера тоже
+	traits.add_supported_fan_mode(climate::CLIMATE_FAN_AUTO);	// Автоматический режим вентилятора доступен всегда
+	traits.add_supported_preset(ClimatePreset::CLIMATE_PRESET_NONE);	// На всякий случай без предустановок
+	traits.add_supported_swing_mode(climate::CLIMATE_SWING_OFF);// Выключенный режим качания заслонок доступен всегда
 
-	traits.add_supported_mode(climate::CLIMATE_MODE_OFF);		// The air conditioner's off mode is always available
-	traits.add_supported_mode(climate::CLIMATE_MODE_AUTO);		// Automatic mode of the air conditioner is also always available
-	traits.add_supported_fan_mode(climate::CLIMATE_FAN_AUTO);	// The automatic mode of the fan is always available
-	traits.add_supported_swing_mode(climate::CLIMATE_SWING_OFF);    // The off mode of vent swinging is always available
-
-	traits.set_visual_temperature_step(STEP_TEMPERATURE);
-	traits.set_visual_min_temperature(MIN_SET_TEMPERATURE);
-	traits.set_visual_max_temperature(MAX_SET_TEMPERATURE);
+//	traits.set_visual_temperature_step(STEP_TEMPERATURE);
+//	traits.set_visual_min_temperature(MIN_SET_TEMPERATURE);
+//	traits.set_visual_max_temperature(MAX_SET_TEMPERATURE);
 
 	return traits;
 }
@@ -43,17 +45,17 @@ void tclacClimate::setup() {
 }
 
 void tclacClimate::loop()  {
-	// If there is something in the UART buffer, then read that something
+	// Если в буфере UART что-то есть, то читаем это что-то
 	if (esphome::uart::UARTDevice::available() > 0) {
 		dataShow(0, true);
 		dataRX[0] = esphome::uart::UARTDevice::read();
-		// If the received byte is not a header (0xBB), then simply exit the loop
+		// Если принятый байт- не заголовок (0xBB), то просто покидаем цикл
 		if (dataRX[0] != 0xBB) {
 			ESP_LOGD("TCL", "Wrong byte");
 			dataShow(0,0);
 			return;
 		}
-		// If the header (0xBB) matches, then start reading the next 4 bytes sequentially
+		// А вот если совпал заголовок (0xBB), то начинаем чтение по цепочке еще 4 байт
 		delay(5);
 		dataRX[1] = esphome::uart::UARTDevice::read();
 		delay(5);
@@ -64,16 +66,19 @@ void tclacClimate::loop()  {
 		dataRX[4] = esphome::uart::UARTDevice::read();
 
 		auto raw = getHex(dataRX, 5);
-		ESP_LOGD("TCL", "first 5 byte : %s ", raw.c_str());
+		
+		//ESP_LOGD("TCL", "first 5 byte : %s ", raw.c_str());
 
-		// Of the first 5 bytes, we need the fifth one - it contains the message length
+		// Из первых 5 байт нам нужен пятый- он содержит длину сообщения
 		esphome::uart::UARTDevice::read_array(dataRX+5, dataRX[4]+1);
 
 		byte check = getChecksum(dataRX, sizeof(dataRX));
 
 		raw = getHex(dataRX, sizeof(dataRX));
-		ESP_LOGD("TCL", "RX full : %s ", raw.c_str());
-		// Check the checksum
+		
+		//ESP_LOGD("TCL", "RX full : %s ", raw.c_str());
+		
+		// Проверяем контрольную сумму
 		if (check != dataRX[60]) {
 			ESP_LOGD("TCL", "Invalid checksum %x", check);
 			tclacClimate::dataShow(0,0);
@@ -82,15 +87,13 @@ void tclacClimate::loop()  {
 			ESP_LOGD("TCL", "checksum OK %x", check);
 		}
 		tclacClimate::dataShow(0,0);
-		// After reading everything from the buffer, proceed to parse the data
+		// Прочитав все из буфера приступаем к разбору данных
 		tclacClimate::readData();
 	}
 }
 
 void tclacClimate::update() {
-	
 	tclacClimate::dataShow(1,1);
-	//Serial.write(poll, sizeof(poll));
 	this->esphome::uart::UARTDevice::write_array(poll, sizeof(poll));
 	auto raw = tclacClimate::getHex(poll, sizeof(poll));
 	ESP_LOGD("TCL", "chek status sended");
@@ -105,7 +108,7 @@ void tclacClimate::readData() {
 	ESP_LOGD("TCL", "TEMP: %f ", current_temperature);
 
 	if (dataRX[MODE_POS] & ( 1 << 4)) {
-		// If the air conditioner is turned on, then parse the data for display
+		// Если кондиционер включен, то разбираем данные для отображения
 		uint8_t modeswitch = MODE_MASK & dataRX[MODE_POS];
 		uint8_t fanspeedswitch = FAN_SPEED_MASK & dataRX[FAN_SPEED_POS];
 		uint8_t swingmodeswitch = SWING_MODE_MASK & dataRX[SWING_POS];
@@ -173,20 +176,74 @@ void tclacClimate::readData() {
 				swing_mode = climate::CLIMATE_SWING_BOTH;
 				break;
 		}
+		
+		// Обработка данных о пресете
+		preset = ClimatePreset::CLIMATE_PRESET_NONE;
+		if (dataRX[7] & (1 << 6)){
+			preset = ClimatePreset::CLIMATE_PRESET_ECO;
+		} else if (dataRX[9] & (1 << 2)){
+			preset = ClimatePreset::CLIMATE_PRESET_COMFORT;
+		} else if (dataRX[19] & (1 << 0)){
+			preset = ClimatePreset::CLIMATE_PRESET_SLEEP;
+		}
+		
 	} else {
-		// If the air conditioner is turned off, then all modes are displayed as off
+		// Если кондиционер выключен, то все режимы показываются, как выключенные
 		mode = climate::CLIMATE_MODE_OFF;
-		fan_mode = climate::CLIMATE_FAN_AUTO;
+		fan_mode = climate::CLIMATE_FAN_OFF;
 		swing_mode = climate::CLIMATE_SWING_OFF;
+		preset = climate::CLIMATE_PRESET_NONE;
 	}
-	// Publish the data
+	// Публикуем данные
 	this->publish_state();
-    }
+	allow_take_control = true;
+   }
 
 // Climate control
 void tclacClimate::control(const ClimateCall &call) {
+	// Запрашиваем данные из переключателя режимов работы кондиционера
+	if (call.get_mode().has_value()){
+		switch_climate_mode = call.get_mode().value();
+	} else {
+		switch_climate_mode = mode;
+	}
 	
-	uint8_t switchvar = 0;
+	
+	// Запрашиваем данные из переключателя предустановок кондиционера
+	if (call.get_preset().has_value()){
+		switch_preset = call.get_preset().value();
+	} else {
+		switch_preset = preset.value();
+	}
+	
+	// Запрашиваем данные из переключателя режимов вентилятора
+	if (call.get_fan_mode().has_value()){
+		switch_fan_mode = call.get_fan_mode().value();
+	} else {
+		switch_fan_mode = fan_mode.value();
+	}
+	
+	// Запрашиваем данные из переключателя режимов качания заслонок
+	if (call.get_swing_mode().has_value()){
+		switch_swing_mode = call.get_swing_mode().value();
+	} else {
+		// А если в переключателе пусто- заполняем значением из последнего опроса состояния. Типа, ничего не поменялось.
+		switch_swing_mode = swing_mode;
+	}
+	
+	// Расчет температуры
+	if (call.get_target_temperature().has_value()) {
+		target_temperature_set = 31-(int)call.get_target_temperature().value();
+	} else {
+		target_temperature_set = 31-(int)target_temperature;
+	}
+	
+	takeControl();
+	allow_take_control = true;
+}
+	
+	
+void tclacClimate::takeControl() {
 	
 	dataTX[7]  = 0b00000000;//eco,display,beep,ontimerenable, offtimerenable,power,0,0
 	dataTX[8]  = 0b00000000;//mute,0,turbo,health,mode(4)  0=cool 1=fan  2=dry 3=heat 4=auto 
@@ -194,16 +251,11 @@ void tclacClimate::control(const ClimateCall &call) {
 	dataTX[10] = 0b00000000;//[10] = 0,timerindicator,swingv(3),fan(3) 0=auto 1=low 2=med 3=high
 							//																{0,2,3,5,0};
 	dataTX[11] = 0b00000000;
+	dataTX[19] = 0b00000000;
 	dataTX[32] = 0b00000000;
 	dataTX[33] = 0b00000000;
 	
-	if (call.get_mode().has_value()){
-		switchvar = call.get_mode().value();
-	} else {
-		switchvar = mode;
-	}
-
-	// Turn the buzzer on or off depending on the switch setting
+	// Включаем или отключаем пищалку в зависимости от переключателя в настройках
 	if (beeper_status_){
 		ESP_LOGD("TCL", "Beep mode ON");
 		dataTX[7] += 0b00100000;
@@ -212,23 +264,21 @@ void tclacClimate::control(const ClimateCall &call) {
 		dataTX[7] += 0b00000000;
 	}
 	
-	// Turn the air conditioner display on or off depending on the switch setting
-	// Turn on the display only if the air conditioner is in one of the operational modes
+	// Включаем или отключаем дисплей на кондиционере в зависимости от переключателя в настройках
+	// Включаем дисплей только если кондиционер в одном из рабочих режимов
 	
-	// CAUTION! When turning off the display, the air conditioner forcibly switches to automatic mode!
+	// ВНИМАНИЕ! При выключении дисплея кондиционер сам принудительно переходит в автоматический режим!
 	
-	if (display_status_ && switchvar != climate::CLIMATE_MODE_OFF) {
-    ESP_LOGD("TCL", "Display turn ON");
-    // Turn on the display
-    dataTX[7] |= 0b01000000;
-} else {
-    ESP_LOGD("TCL", "Display turn OFF");
-    // Turn off the display
-    dataTX[7] &= ~0b01000000;
-}
+	if ((display_status_) && (switch_climate_mode != climate::CLIMATE_MODE_OFF)){
+		ESP_LOGD("TCL", "Dispaly turn ON");
+		dataTX[7] += 0b01000000;
+	} else {
+		ESP_LOGD("TCL", "Dispaly turn OFF");
+		dataTX[7] += 0b00000000;
+	}
 		
-	// Configure the operation mode of the air conditioner
-	switch (switchvar) {
+	// Настраиваем режим работы кондиционера
+	switch (switch_climate_mode) {
 		case climate::CLIMATE_MODE_OFF:
 			dataTX[7] += 0b00000000;
 			dataTX[8] += 0b00000000;
@@ -255,114 +305,44 @@ void tclacClimate::control(const ClimateCall &call) {
 			break;
 	}
 
-	// Configure the operation mode of the fan
-	if (call.get_fan_mode().has_value()){
-		switchvar = call.get_fan_mode().value();
-		switch(switchvar) {
-			case climate::CLIMATE_FAN_AUTO:
-				dataTX[8]	+= 0b00000000;
-				dataTX[10]	+= 0b00000000;
-				break;
-			case climate::CLIMATE_FAN_QUIET:
-				dataTX[8]	+= 0b10000000;
-				dataTX[10]	+= 0b00000000;
-				break;
-			case climate::CLIMATE_FAN_LOW:
-				dataTX[8]	+= 0b00000000;
-				dataTX[10]	+= 0b00000001;
-				break;
-			case climate::CLIMATE_FAN_MIDDLE:
-				dataTX[8]	+= 0b00000000;
-				dataTX[10]	+= 0b00000110;
-				break;
-			case climate::CLIMATE_FAN_MEDIUM:
-				dataTX[8]	+= 0b00000000;
-				dataTX[10]	+= 0b00000011;
-				break;
-			case climate::CLIMATE_FAN_HIGH:
-				dataTX[8]	+= 0b00000000;
-				dataTX[10]	+= 0b00000111;
-				break;
-			case climate::CLIMATE_FAN_FOCUS:
-				dataTX[8]	+= 0b00000000;
-				dataTX[10]	+= 0b00000101;
-				break;
-			case climate::CLIMATE_FAN_DIFFUSE:
-				dataTX[8]	+= 0b01000000;
-				dataTX[10]	+= 0b00000000;
-				break;
-		}		
-	} else {
-		if(fan_mode == climate::CLIMATE_FAN_AUTO){
+	// Настраиваем режим вентилятора
+	switch(switch_fan_mode) {
+		case climate::CLIMATE_FAN_AUTO:
 			dataTX[8]	+= 0b00000000;
 			dataTX[10]	+= 0b00000000;
-		} else if(fan_mode == climate::CLIMATE_FAN_QUIET){
+			break;
+		case climate::CLIMATE_FAN_QUIET:
 			dataTX[8]	+= 0b10000000;
 			dataTX[10]	+= 0b00000000;
-		} else if(fan_mode == climate::CLIMATE_FAN_LOW){
+			break;
+		case climate::CLIMATE_FAN_LOW:
 			dataTX[8]	+= 0b00000000;
 			dataTX[10]	+= 0b00000001;
-		} else if(fan_mode == climate::CLIMATE_FAN_MIDDLE){
+			break;
+		case climate::CLIMATE_FAN_MIDDLE:
 			dataTX[8]	+= 0b00000000;
 			dataTX[10]	+= 0b00000110;
-		} else if(fan_mode == climate::CLIMATE_FAN_MEDIUM){
+			break;
+		case climate::CLIMATE_FAN_MEDIUM:
 			dataTX[8]	+= 0b00000000;
 			dataTX[10]	+= 0b00000011;
-		} else if(fan_mode == climate::CLIMATE_FAN_HIGH){
+			break;
+		case climate::CLIMATE_FAN_HIGH:
 			dataTX[8]	+= 0b00000000;
 			dataTX[10]	+= 0b00000111;
-		} else if(fan_mode == climate::CLIMATE_FAN_FOCUS){
+			break;
+		case climate::CLIMATE_FAN_FOCUS:
 			dataTX[8]	+= 0b00000000;
 			dataTX[10]	+= 0b00000101;
-		} else if(fan_mode == climate::CLIMATE_FAN_DIFFUSE){
+			break;
+		case climate::CLIMATE_FAN_DIFFUSE:
 			dataTX[8]	+= 0b01000000;
 			dataTX[10]	+= 0b00000000;
-		}
+			break;
 	}
-
-// Louver Mode
-//  Vertical Louver
-//      Vertical Louver Swing [10 bytes, mask 00111000]:
-//          000 - Swing disabled, louver in last position or in fixation
-//        111 - Swing enabled in the selected mode
-//       Vertical Louver Swing Mode (louver fixation mode doesn't matter if swing is enabled) [32 bytes, mask 00011000]:
-//           01 - swing from top to bottom, DEFAULT
-//           10 - swing in the upper half
-//           11 - swing in the lower half
-//       Louver Fixation Mode (louver swing mode doesn't matter if swing is disabled) [32 bytes, mask 00000111]:
-//           000 - no fixation, DEFAULT
-//           001 - fixation at the top
-//           010 - fixation between top and middle
-//           011 - fixation at the middle
-//           100 - fixation between middle and bottom
-//           101 - fixation at the bottom
-//   Horizontal Louvers
-//       Horizontal Louver Swing [11 bytes, mask 00001000]:
-//           0 - Swing disabled, louvers in last position or in fixation
-//           1 - Swing enabled in the selected mode
-//       Horizontal Louver Swing Mode (louver fixation mode doesn't matter if swing is enabled) [33 bytes, mask 00111000]:
-//           001 - swing from left to right, DEFAULT
-//           010 - swing from left
-//           011 - swing in the middle
-//           100 - swing from right
-//       Horizontal Louver Fixation Mode (louver swing mode doesn't matter if swing is disabled) [33 bytes, mask 00000111]:
-//           000 - no fixation, DEFAULT
-//           001 - fixation on the left
-//           010 - fixation between left and middle
-//           011 - fixation in the middle
-//           100 - fixation between middle and right
-//           101 - fixation on the right
-
-
-// Request data from the louvers swing mode switch
-	if (call.get_swing_mode().has_value()){
-		switchvar = call.get_swing_mode().value();
-	} else {
-		// If the switch is empty, fill it with the value from the last state polling. It's like nothing has changed.
-		switchvar = swing_mode;
-	}
-	// Set the vent swing mode
-	switch(switchvar) {
+	
+	// Устанавливаем режим качания заслонок
+	switch(switch_swing_mode) {
 		case climate::CLIMATE_SWING_OFF:
 			dataTX[10]	+= 0b00000000;
 			dataTX[11]	+= 0b00000000;
@@ -380,7 +360,57 @@ void tclacClimate::control(const ClimateCall &call) {
 			dataTX[11]	+= 0b00001000;  
 			break;
 	}
-	// Set the mode for vertical vent swing
+	
+	// Устанавливаем предустановки кондиционера
+	switch(switch_preset) {
+		case ClimatePreset::CLIMATE_PRESET_NONE:
+			break;
+		case ClimatePreset::CLIMATE_PRESET_ECO:
+			dataTX[7]	+= 0b10000000;
+			break;
+		case ClimatePreset::CLIMATE_PRESET_SLEEP:
+			dataTX[19]	+= 0b00000001;
+			break;
+		case ClimatePreset::CLIMATE_PRESET_COMFORT:
+			dataTX[8]	+= 0b00001000;
+			break;
+	}
+
+        //Режим заслонок
+		//	Вертикальная заслонка
+		//		Качание вертикальной заслонки [10 байт, маска 00111000]:
+		//			000 - Качание отключено, заслонка в последней позиции или в фиксации
+		//			111 - Качание включено в выбранном режиме
+		//		Режим качания вертикальной заслонки (режим фиксации заслонки роли не играет, если качание включено) [32 байт, маска 00011000]:
+		//			01 - качание сверху вниз, ПО УМОЛЧАНИЮ
+		//			10 - качание в верхней половине
+		//			11 - качание в нижней половине
+		//		Режим фиксации заслонки (режим качания заслонки роли не играет, если качание выключено) [32 байт, маска 00000111]:
+		//			000 - нет фиксации, ПО УМОЛЧАНИЮ
+		//			001 - фиксация вверху
+		//			010 - фиксация между верхом и серединой
+		//			011 - фиксация в середине
+		//			100 - фиксация между серединой и низом
+		//			101 - фиксация внизу
+		//	Горизонтальные заслонки
+		//		Качание горизонтальных заслонок [11 байт, маска 00001000]:
+		//			0 - Качание отключено, заслонки в последней позиции или в фиксации
+		//			1 - Качание включено в выбранном режиме
+		//		Режим качания горизонтальных заслонок (режим фиксации заслонок роли не играет, если качание включено) [33 байт, маска 00111000]:
+		//			001 - качание слева направо, ПО УМОЛЧАНИЮ
+		//			010 - качание слева
+		//			011 - качание по середине
+		//			100 - качание справа
+		//		Режим фиксации горизонтальных заслонок (режим качания заслонок роли не играет, если качание выключено) [33 байт, маска 00000111]:
+		//			000 - нет фиксации, ПО УМОЛЧАНИЮ
+		//			001 - фиксация слева
+		//			010 - фиксация между левой стороной и серединой
+		//			011 - фиксация в середине
+		//			100 - фиксация между серединой и правой стороной
+		//			101 - фиксация справа
+		
+		
+	// Устанавливаем режим для качания вертикальной заслонки
 	switch(vertical_swing_direction_) {
 		case VerticalSwingDirection::UP_DOWN:
 			dataTX[32]	+= 0b00001000;
@@ -395,7 +425,7 @@ void tclacClimate::control(const ClimateCall &call) {
 			ESP_LOGD("TCL", "Vertical swing: downer");
 			break;
 	}
-	// Set the mode for vertical vent swing
+	// Устанавливаем режим для качания горизонтальных заслонок
 	switch(horizontal_swing_direction_) {
 		case HorizontalSwingDirection::LEFT_RIGHT:
 			dataTX[33]	+= 0b00001000;
@@ -414,8 +444,8 @@ void tclacClimate::control(const ClimateCall &call) {
 			ESP_LOGD("TCL", "Horizontal swing: righter");
 			break;
 	}
-	// Set the position fixation of the vertical vent
-	switch(this->vertical_direction_) {
+	// Устанавливаем положение фиксации вертикальной заслонки
+	switch(vertical_direction_) {
 		case AirflowVerticalDirection::LAST:
 			dataTX[32]	+= 0b00000000;
 			ESP_LOGD("TCL", "Vertical fix: last position");
@@ -441,8 +471,8 @@ void tclacClimate::control(const ClimateCall &call) {
 			ESP_LOGD("TCL", "Vertical fix: down");
 			break;
 	}
-	// Set the position fixation of the horizontal vents
-	switch(this->horizontal_direction_) {
+	// Устанавливаем положение фиксации горизонтальных заслонок
+	switch(horizontal_direction_) {
 		case AirflowHorizontalDirection::LAST:
 			dataTX[33]	+= 0b00000000;
 			ESP_LOGD("TCL", "Horizontal fix: last position");
@@ -469,19 +499,15 @@ void tclacClimate::control(const ClimateCall &call) {
 			break;
 	}
 
-	// Calculation and setting of the temperature
-	if (call.get_target_temperature().has_value()) {
-		dataTX[9] = 31-(int)call.get_target_temperature().value();		//0,0,0,0, temp(4)
-	} else {
-		dataTX[9] = 31-(int)target_temperature;
-	}
-
-	// Constructing an array of bytes for transmission to the air conditioner
-	dataTX[0] = 0xBB;	//Start byte of the header
-	dataTX[1] = 0x00;	//Start byte of the header
-	dataTX[2] = 0x01;	//Start byte of the header
-	dataTX[3] = 0x03;	//0x03 - control, 0x04 - polling
-	dataTX[4] = 0x20;	//0x20 - control, 0x19 - polling
+	// Установка температуры
+	dataTX[9] = target_temperature_set;
+		
+	// Собираем массив байт для отправки в кондиционер
+	dataTX[0] = 0xBB;	//стартовый байт заголовка
+	dataTX[1] = 0x00;	//стартовый байт заголовка
+	dataTX[2] = 0x01;	//стартовый байт заголовка
+	dataTX[3] = 0x03;	//0x03 - управление, 0x04 - опрос
+	dataTX[4] = 0x20;	//0x20 - управление, 0x19 - опрос
 	dataTX[5] = 0x03;	//??
 	dataTX[6] = 0x01;	//??
 	//dataTX[7] = 0x64;	//eco,display,beep,ontimerenable, offtimerenable,power,0,0
@@ -496,7 +522,7 @@ void tclacClimate::control(const ClimateCall &call) {
 	dataTX[16] = 0x00;	//??
 	dataTX[17] = 0x00;	//??
 	dataTX[18] = 0x00;	//??
-	dataTX[19] = 0x00;	//sleep on = 1 off=0
+	//dataTX[19] = 0x00;	//sleep on = 1 off=0
 	dataTX[20] = 0x00;	//??
 	dataTX[21] = 0x00;	//??
 	dataTX[22] = 0x00;	//??
@@ -508,17 +534,18 @@ void tclacClimate::control(const ClimateCall &call) {
 	dataTX[28] = 0x00;	//??
 	dataTX[30] = 0x00;	//??
 	dataTX[31] = 0x00;	//??
-	//dataTX[32] = 0x00;	//0,0,0,vertical swing mode(2), vertical fixation mode(3)
-	//dataTX[33] = 0x00;	//0,0, horizontal swing mode(3), horizontal fixation mode(3)
+	//dataTX[32] = 0x00;	//0,0,0,режим вертикального качания(2),режим вертикальной фиксации(3)
+	//dataTX[33] = 0x00;	//0,0,режим горизонтального качания(3),режим горизонтальной фиксации(3)
 	dataTX[34] = 0x00;	//??
 	dataTX[35] = 0x00;	//??
 	dataTX[36] = 0x00;	//??
-	dataTX[37] = 0xFF;	//Checksum
+	dataTX[37] = 0xFF;	//Контрольная сумма
 	dataTX[37] = tclacClimate::getChecksum(dataTX, sizeof(dataTX));
 
 	tclacClimate::sendData(dataTX, sizeof(dataTX));
 }
-// Sending data to the air conditioner
+
+// Отправка данных в кондиционер
 void tclacClimate::sendData(byte * message, byte size) {
 	tclacClimate::dataShow(1,1);
 	//Serial.write(message, size);
@@ -527,7 +554,8 @@ void tclacClimate::sendData(byte * message, byte size) {
 	ESP_LOGD("TCL", "Message to TCL sended...");
 	tclacClimate::dataShow(1,0);
 }
-// Byte conversion to readable format
+
+// Преобразование байта в читабельный формат
 String tclacClimate::getHex(byte *message, byte size) {
 	String raw;
 	for (int i = 0; i < size; i++) {
@@ -536,7 +564,8 @@ String tclacClimate::getHex(byte *message, byte size) {
 	raw.toUpperCase();
 	return raw;
 }
-// Checksum calculation
+
+// Вычисление контрольной суммы
 byte tclacClimate::getChecksum(const byte * message, size_t size) {
 	byte position = size - 1;
 	byte crc = 0;
@@ -544,7 +573,8 @@ byte tclacClimate::getChecksum(const byte * message, size_t size) {
 		crc ^= message[i];
 	return crc;
 }
-// Flashing LEDs
+
+// Мигаем светодиодами
 void tclacClimate::dataShow(bool flow, bool shine) {
 	if (module_display_status_){
 		if (flow == 0){
@@ -572,62 +602,103 @@ void tclacClimate::dataShow(bool flow, bool shine) {
 	}
 }
 
-// Actions with data from the configuration
+// Действия с данными из конфига
 
-// Obtaining the buzzer state
+// Получение состояния пищалки
 void tclacClimate::set_beeper_state(bool state) {
 	this->beeper_status_ = state;
+	if (force_mode_status_){
+		if (allow_take_control){
+			tclacClimate::takeControl();
+		}
+	}
 }
-// Obtaining the air conditioner display state
+// Получение состояния дисплея кондиционера
 void tclacClimate::set_display_state(bool state) {
 	this->display_status_ = state;
+	if (force_mode_status_){
+		if (allow_take_control){
+			tclacClimate::takeControl();
+		}
+	}
 }
-// Obtaining the data reception LED pin
+
+// Получение состояния режима принудительного применения настроек
+void tclacClimate::set_force_mode_state(bool state) {
+	this->force_mode_status_ = state;
+}
+
+// Получение пина светодиода приема данных
 #ifdef CONF_RX_LED
 void tclacClimate::set_rx_led_pin(GPIOPin *rx_led_pin) {
 	this->rx_led_pin_ = rx_led_pin;
 }
 #endif
-// Obtaining the data transmission LED pin
+// Получение пина светодиода передачи данных
 #ifdef CONF_TX_LED
 void tclacClimate::set_tx_led_pin(GPIOPin *tx_led_pin) {
 	this->tx_led_pin_ = tx_led_pin;
 }
 #endif
-// Obtaining the status of the module communication LEDs
+// Получение состояния светодиодов связи модуля
 void tclacClimate::set_module_display_state(bool state) {
 	this->module_display_status_ = state;
 }
-// Obtaining the vertical vent fixation mode
+// Получение режима фиксации вертикальной заслонки
 void tclacClimate::set_vertical_airflow(AirflowVerticalDirection direction) {
 	this->vertical_direction_ = direction;
+	if (force_mode_status_){
+		if (allow_take_control){
+			tclacClimate::takeControl();
+		}
+	}
 }
-// Obtaining the horizontal vent fixation mode
+// Получение режима фиксации горизонтальных заслонок
 void tclacClimate::set_horizontal_airflow(AirflowHorizontalDirection direction) {
 	this->horizontal_direction_ = direction;
+	if (force_mode_status_){
+		if (allow_take_control){
+			tclacClimate::takeControl();
+		}
+	}
 }
-// Obtaining the vertical vent swing mode
+// Получение режима качания вертикальной заслонки
 void tclacClimate::set_vertical_swing_direction(VerticalSwingDirection direction) {
 	this->vertical_swing_direction_ = direction;
+	if (force_mode_status_){
+		if (allow_take_control){
+			tclacClimate::takeControl();
+		}
+	}
 }
-// Obtaining the available operation modes of the air conditioner
+// Получение доступных режимов работы кондиционера
 void tclacClimate::set_supported_modes(const std::set<climate::ClimateMode> &modes) {
 	this->supported_modes_ = modes;
 }
-// Obtaining the horizontal vent swing mode
+// Получение режима качания горизонтальных заслонок
 void tclacClimate::set_horizontal_swing_direction(HorizontalSwingDirection direction) {
-	this->horizontal_swing_direction_ = direction;
+	horizontal_swing_direction_ = direction;
+	if (force_mode_status_){
+		if (allow_take_control){
+			tclacClimate::takeControl();
+		}
+	}
 }
-// Obtaining the available fan speeds
+// Получение доступных скоростей вентилятора
 void tclacClimate::set_supported_fan_modes(const std::set<climate::ClimateFanMode> &modes){
 	this->supported_fan_modes_ = modes;
 }
-// Obtaining the available vent swing modes
+// Получение доступных режимов качания заслонок
 void tclacClimate::set_supported_swing_modes(const std::set<climate::ClimateSwingMode> &modes) {
 	this->supported_swing_modes_ = modes;
 }
 
-// Function templates for querying state, might be useful in the future if feedback is implemented. Really don't want to, it will be very cumbersome.
+
+void tclacClimate::set_supported_presets(const std::set<climate::ClimatePreset> &presets) {
+  this->supported_presets_ = presets;
+}
+
+// Заготовки функций запроса состояния, может пригодиться в будущем, если делать обратную связь. Очень не хочется, будет очень костыльно.
 
 //bool tclacClimate::get_beeper_state() const { return this->beeper_status_; }
 //bool tclacClimate::get_display_state() const { return this->display_status_; }
