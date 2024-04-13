@@ -156,24 +156,7 @@ switch:
       then:
         lambda: !lambda |-
           id(${device_name}climate).set_display_state(false);
-  
-  # Светодиодная индикация обмена данными с кондиционером, по умолчанию выключена
-  - name: Display on module
-    platform: template
-    device_class: switch
-    id: ledflash_mode
-    entity_category: config
-    restore_mode: RESTORE_DEFAULT_ON
-    optimistic: true
-    on_turn_on:
-      then:
-        lambda: !lambda |-
-          id(${device_name}climate).set_module_display_state(true);
-    on_turn_off:
-      then:
-        lambda: !lambda |-
-          id(${device_name}climate).set_module_display_state(false);
-          
+            
   - name: Force config
     platform: template
     device_class: switch
