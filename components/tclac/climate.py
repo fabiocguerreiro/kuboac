@@ -6,6 +6,7 @@ from esphome.const import (
     CONF_ID,
     CONF_LEVEL,
     CONF_BEEPER,
+    CONF_VISUAL,
     CONF_MAX_TEMPERATURE,
     CONF_MIN_TEMPERATURE,
     CONF_SUPPORTED_MODES,
@@ -24,7 +25,7 @@ from esphome.components.climate import (
 )
 
 AUTO_LOAD = ["climate"]
-CODEOWNERS = ["@I-am-nightingale"]
+CODEOWNERS = ["@I-am-nightingale", "@xaxexa", "@junkfix"]
 DEPENDENCIES = ["climate", "uart"]
 
 TCLAC_MIN_TEMPERATURE = 16.0
@@ -73,7 +74,7 @@ SUPPORTED_CLIMATE_MODES_OPTIONS = {
 }
 
 SUPPORTED_CLIMATE_PRESETS_OPTIONS = {
-    "NONE": ClimatePreset.CLIMATE_PRESET_NONE,
+    "NONE": ClimatePreset.CLIMATE_PRESET_NONE, # Доступен всегда
     "ECO": ClimatePreset.CLIMATE_PRESET_ECO,
     "SLEEP": ClimatePreset.CLIMATE_PRESET_SLEEP,
     "COMFORT": ClimatePreset.CLIMATE_PRESET_COMFORT,
@@ -162,7 +163,8 @@ CONFIG_SCHEMA = cv.All(
         }
     )
     .extend(uart.UART_DEVICE_SCHEMA)
-    .extend(cv.COMPONENT_SCHEMA)
+    .extend(cv.COMPONENT_SCHEMA),
+    validate_visual,
 )
 
 ForceOnAction = tclac_ns.class_("ForceOnAction", automation.Action)
