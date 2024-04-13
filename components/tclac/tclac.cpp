@@ -192,7 +192,7 @@ void tclacClimate::readData() {
 	} else {
 		// Если кондиционер выключен, то все режимы показываются, как выключенные
 		mode = climate::CLIMATE_MODE_OFF;
-		fan_mode = climate::CLIMATE_FAN_OFF;
+		fan_mode = climate::CLIMATE_FAN_AUTO;
 		swing_mode = climate::CLIMATE_SWING_OFF;
 		preset = climate::CLIMATE_PRESET_NONE;
 	}
