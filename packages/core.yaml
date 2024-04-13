@@ -29,11 +29,6 @@ esphome:
         } else {
           id(${device_name}climate).set_display_state(false);
         }
-        if (id(ledflash_mode).state){
-          id(${device_name}climate).set_module_display_state(true);
-        } else {
-          id(${device_name}climate).set_module_display_state(false);
-        }
         if (id(force_mode).state){
           id(${device_name}climate).set_force_mode_state(true);
         } else {
