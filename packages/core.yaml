@@ -10,10 +10,11 @@ external_components:
       ref: master
     components: [ tclac ]
     refresh: 30s
-
+    
 # Конфигурация ESPHome
 esphome:
   name: ${device_name}
+  min_version: 2023.3.0
   friendly_name: ${humanly_name}
   on_boot:
     priority: -100
