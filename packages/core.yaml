@@ -173,13 +173,13 @@ switch:
 select:
   # Настройка вертикального качания
   - platform: template
-    name: Vertical swing
+    name: Balanço Vertical
     id: vswing
     entity_category: config
     options:
-      - "UP<->DOWN"
-      - "UPSIDE"
-      - "DOWNSIDE"
+      - "CIMA <-> BAIXO"
+      - "METADE SUPERIOR"
+      - "METADE INFERIOR"
     optimistic: true
     restore_value: true
     on_value:
@@ -220,16 +220,16 @@ select:
 
   # Настройка фиксации вертикальной заслонки
   - platform: template
-    name: Vertical fixing
+    name: Posição Vertical
     id: vfixing
     entity_category: config
     options:
-      - LAST CONFIG
-      - MAX UP
-      - UP
-      - CENTER
-      - DOWN
-      - MAX DOWN
+      - ULTIMA CONFIG
+      - MAXIMO CIMA
+      - CIMA
+      - CENTRO
+      - BAIXO
+      - MAX BAIXO
     optimistic: true
     restore_value: true
     on_value:
