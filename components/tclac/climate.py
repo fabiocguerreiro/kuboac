@@ -39,15 +39,13 @@ CONF_DISPLAY = "show_display"
 CONF_FORCE_MODE = "force_mode"
 CONF_VERTICAL_AIRFLOW = "vertical_airflow"
 CONF_MODULE_DISPLAY = "show_module_display"
-CONF_HORIZONTAL_AIRFLOW = "horizontal_airflow"
 CONF_VERTICAL_SWING_MODE = "vertical_swing_mode"
-CONF_HORIZONTAL_SWING_MODE = "horizontal_swing_mode"
 
 tclac_ns = cg.esphome_ns.namespace("tclac")
 tclacClimate = tclac_ns.class_("tclacClimate", uart.UARTDevice, climate.Climate, cg.PollingComponent)
 
 SUPPORTED_FAN_MODES_OPTIONS = {
-    "AUTO": ClimateMode.CLIMATE_FAN_AUTO,  # Доступен всегда
+    "AUTO": ClimateMode.CLIMATE_FAN_AUTO,
     "QUIET": ClimateMode.CLIMATE_FAN_QUIET,
     "LOW": ClimateMode.CLIMATE_FAN_LOW,
     "MIDDLE": ClimateMode.CLIMATE_FAN_MIDDLE,
@@ -58,10 +56,8 @@ SUPPORTED_FAN_MODES_OPTIONS = {
 }
 
 SUPPORTED_SWING_MODES_OPTIONS = {
-    "OFF": ClimateSwingMode.CLIMATE_SWING_OFF,  # Доступен всегда
+    "OFF": ClimateSwingMode.CLIMATE_SWING_OFF,
     "VERTICAL": ClimateSwingMode.CLIMATE_SWING_VERTICAL,
-    "HORIZONTAL": ClimateSwingMode.CLIMATE_SWING_HORIZONTAL,
-    "BOTH": ClimateSwingMode.CLIMATE_SWING_BOTH,
 }
 
 SUPPORTED_CLIMATE_MODES_OPTIONS = {
@@ -77,7 +73,6 @@ SUPPORTED_CLIMATE_PRESETS_OPTIONS = {
     "NONE": ClimatePreset.CLIMATE_PRESET_NONE, # Доступен всегда
     "ECO": ClimatePreset.CLIMATE_PRESET_ECO,
     "SLEEP": ClimatePreset.CLIMATE_PRESET_SLEEP,
-    "COMFORT": ClimatePreset.CLIMATE_PRESET_COMFORT,
 }
 
 VerticalSwingDirection = tclac_ns.enum("VerticalSwingDirection", True)
