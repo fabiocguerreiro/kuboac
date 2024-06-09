@@ -122,8 +122,6 @@ CONFIG_SCHEMA = cv.All(
             cv.GenerateID(): cv.declare_id(tclacClimate),
             cv.Optional(CONF_BEEPER, default=True): cv.boolean,
             cv.Optional(CONF_DISPLAY, default=True): cv.boolean,
-            cv.Optional(CONF_RX_LED): pins.gpio_output_pin_schema,
-            cv.Optional(CONF_TX_LED): pins.gpio_output_pin_schema,
             cv.Optional(CONF_FORCE_MODE, default=True): cv.boolean,
             cv.Optional(CONF_MODULE_DISPLAY, default=True): cv.boolean,
             cv.Optional(CONF_VERTICAL_AIRFLOW, default="CENTER"): cv.ensure_list(cv.enum(AIRFLOW_VERTICAL_DIRECTION_OPTIONS, upper=True)),
