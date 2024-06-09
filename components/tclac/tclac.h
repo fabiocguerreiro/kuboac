@@ -35,9 +35,7 @@ namespace tclac {
 
 #define SWING_POS			10
 #define SWING_OFF			0b00000000
-#define SWING_HORIZONTAL	0b00100000
 #define SWING_VERTICAL		0b01000000
-#define SWING_BOTH			0b01100000
 #define SWING_MODE_MASK		0b01100000
 
 using climate::ClimateCall;
@@ -52,12 +50,6 @@ enum class VerticalSwingDirection : uint8_t {
 	UPSIDE = 1,
 	DOWNSIDE = 2,
 };
-enum class HorizontalSwingDirection : uint8_t {
-	LEFT_RIGHT = 0,
-	LEFTSIDE = 1,
-	CENTER = 2,
-	RIGHTSIDE = 3,
-};
 enum class AirflowVerticalDirection : uint8_t {
 	LAST = 0,
 	MAX_UP = 1,
@@ -65,14 +57,6 @@ enum class AirflowVerticalDirection : uint8_t {
 	CENTER = 3,
 	DOWN = 4,
 	MAX_DOWN = 5,
-};
-enum class AirflowHorizontalDirection : uint8_t {
-	LAST = 0,
-	MAX_LEFT = 1,
-	LEFT = 2,
-	CENTER = 3,
-	RIGHT = 4,
-	MAX_RIGHT = 5,
 };
 
 class tclacClimate : public climate::Climate, public esphome::uart::UARTDevice, public PollingComponent {
@@ -121,26 +105,20 @@ class tclacClimate : public climate::Climate, public esphome::uart::UARTDevice, 
 		void control(const ClimateCall &call) override;
 		static byte getChecksum(const byte * message, size_t size);
 		void set_vertical_airflow(AirflowVerticalDirection direction);
-		void set_horizontal_airflow(AirflowHorizontalDirection direction);
 		void set_vertical_swing_direction(VerticalSwingDirection direction);
-		void set_horizontal_swing_direction(HorizontalSwingDirection direction);
 		void set_supported_presets(const std::set<climate::ClimatePreset> &presets);
 		void set_supported_modes(const std::set<esphome::climate::ClimateMode> &modes);
 		void set_supported_fan_modes(const std::set<esphome::climate::ClimateFanMode> &modes);
 		void set_supported_swing_modes(const std::set<esphome::climate::ClimateSwingMode> &modes);
 		
 	protected:
-		GPIOPin *rx_led_pin_;
-		GPIOPin *tx_led_pin_;
 		ClimateTraits traits() override;
 		std::set<ClimateMode> supported_modes_{};
 		std::set<ClimatePreset> supported_presets_{};
 		AirflowVerticalDirection vertical_direction_;
 		std::set<ClimateFanMode> supported_fan_modes_{};
-		AirflowHorizontalDirection horizontal_direction_;
 		VerticalSwingDirection vertical_swing_direction_;
 		std::set<ClimateSwingMode> supported_swing_modes_{};
-		HorizontalSwingDirection horizontal_swing_direction_;
 };
 }
 }
