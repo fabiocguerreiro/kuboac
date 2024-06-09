@@ -1,10 +1,3 @@
-/**
-* Create by Miguel Ángel López on 20/07/19
-* and modify by xaxexa
-* Refactoring & component making:
-* Соловей с паяльником 15.03.2024
-**/
-
 #ifndef TCL_ESP_TCL_H
 #define TCL_ESP_TCL_H
 
