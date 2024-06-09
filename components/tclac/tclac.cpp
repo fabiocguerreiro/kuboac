@@ -1,9 +1,3 @@
-/**
-* Create by Miguel Ángel López on 20/07/19
-* and modify by xaxexa
-* Refactoring & component making:
-* Соловей с паяльником 15.03.2024
-**/
 #include "esphome.h"
 #include "esphome/core/defines.h"
 #include "tclac.h"
@@ -33,18 +27,6 @@ ClimateTraits tclacClimate::traits() {
 	return traits;
 }
 
-
-void tclacClimate::setup() {
-
-#ifdef CONF_RX_LED
-	this->rx_led_pin_->setup();
-	this->rx_led_pin_->digital_write(false);
-#endif
-#ifdef CONF_TX_LED
-	this->tx_led_pin_->setup();
-	this->tx_led_pin_->digital_write(false);
-#endif
-}
 
 void tclacClimate::loop()  {
 	// Если в буфере UART что-то есть, то читаем это что-то
