@@ -1,8 +1,3 @@
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-# # # # #                                   НЕ РЕДАКТИРОВАТЬ!!                                  # # # # #
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-
-# Компонент климата
 external_components:
   - source:
       url: https://github.com/fabiocguerreiro/kuboac.git
@@ -11,7 +6,6 @@ external_components:
     components: [ tclac ]
     refresh: 30s
     
-# Конфигурация ESPHome
 esphome:
   name: ${device_name}
   min_version: 2023.3.0
@@ -83,19 +77,10 @@ wifi:
 
 captive_portal:
 
-
-# # # # # # # # # # # # # # # # # # # # # # #
-# # # # #     НЕ РЕДАКТИРОВАТЬ!     # # # # #
-# # # # # # # # # # # # # # # # # # # # # # #
-
-# ОБЯЗАТЕЛЬНО отключаем логгирование через UART
 logger:
   baud_rate: 0
 
-# Раздел настроек устройства:
-# - Переключатели
 switch:
-  # Пищалка для подтверждения команд, по умолчанию выключена
   - name: Som
     platform: template
     device_class: switch
@@ -112,7 +97,6 @@ switch:
         lambda: !lambda |-
           id(${device_name}climate).set_beeper_state(false);
   
-  # Индикатор уставки температуры на корпусе внутреннего блока, по умолчанию включен
   - name: Ecrã
     platform: template
     device_class: switch
@@ -145,9 +129,7 @@ switch:
         lambda: !lambda |-
           id(${device_name}climate).set_force_mode_state(false);
 
-# - Выпадающие списки
 select:
-  # Настройка вертикального качания
   - platform: template
     name: Balanço Vertical
     id: vswing
@@ -169,7 +151,6 @@ select:
             id(${device_name}climate).set_vertical_swing_direction(esphome::tclac::VerticalSwingDirection::DOWNSIDE);
           }
 
-  # Настройка фиксации вертикальной заслонки
   - platform: template
     name: Posição Vertical
     id: vfixing
