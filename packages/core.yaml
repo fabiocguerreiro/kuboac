@@ -176,11 +176,11 @@ select:
     entity_category: config
     options:
       - ULTIMA CONFIG
-      - MAXIMO CIMA
+      - MAXIMO
       - CIMA
       - CENTRO
       - BAIXO
-      - MAX BAIXO
+      - MINIMO
     optimistic: true
     restore_value: true
     on_value:
