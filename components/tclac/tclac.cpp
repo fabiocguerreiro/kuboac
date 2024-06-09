@@ -333,14 +333,6 @@ void tclacClimate::takeControl() {
 			dataTX[10]	+= 0b00111000;
 			dataTX[11]	+= 0b00000000;
 			break;
-		case climate::CLIMATE_SWING_HORIZONTAL:
-			dataTX[10]	+= 0b00000000;
-			dataTX[11]	+= 0b00001000;
-			break;
-		case climate::CLIMATE_SWING_BOTH:
-			dataTX[10]	+= 0b00111000;
-			dataTX[11]	+= 0b00001000;  
-			break;
 	}
 	
 	// Устанавливаем предустановки кондиционера
@@ -407,25 +399,6 @@ void tclacClimate::takeControl() {
 			ESP_LOGD("TCL", "Vertical swing: downer");
 			break;
 	}
-	// Устанавливаем режим для качания горизонтальных заслонок
-	switch(horizontal_swing_direction_) {
-		case HorizontalSwingDirection::LEFT_RIGHT:
-			dataTX[33]	+= 0b00001000;
-			ESP_LOGD("TCL", "Horizontal swing: left-right");
-			break;
-		case HorizontalSwingDirection::LEFTSIDE:
-			dataTX[33]	+= 0b00010000;
-			ESP_LOGD("TCL", "Horizontal swing: lefter");
-			break;
-		case HorizontalSwingDirection::CENTER:
-			dataTX[33]	+= 0b00011000;
-			ESP_LOGD("TCL", "Horizontal swing: center");
-			break;
-		case HorizontalSwingDirection::RIGHTSIDE:
-			dataTX[33]	+= 0b00100000;
-			ESP_LOGD("TCL", "Horizontal swing: righter");
-			break;
-	}
 	// Устанавливаем положение фиксации вертикальной заслонки
 	switch(vertical_direction_) {
 		case AirflowVerticalDirection::LAST:
@@ -451,33 +424,6 @@ void tclacClimate::takeControl() {
 		case AirflowVerticalDirection::MAX_DOWN:
 			dataTX[32]	+= 0b00000101;
 			ESP_LOGD("TCL", "Vertical fix: down");
-			break;
-	}
-	// Устанавливаем положение фиксации горизонтальных заслонок
-	switch(horizontal_direction_) {
-		case AirflowHorizontalDirection::LAST:
-			dataTX[33]	+= 0b00000000;
-			ESP_LOGD("TCL", "Horizontal fix: last position");
-			break;
-		case AirflowHorizontalDirection::MAX_LEFT:
-			dataTX[33]	+= 0b00000001;
-			ESP_LOGD("TCL", "Horizontal fix: left");
-			break;
-		case AirflowHorizontalDirection::LEFT:
-			dataTX[33]	+= 0b00000010;
-			ESP_LOGD("TCL", "Horizontal fix: lefter");
-			break;
-		case AirflowHorizontalDirection::CENTER:
-			dataTX[33]	+= 0b00000011;
-			ESP_LOGD("TCL", "Horizontal fix: center");
-			break;
-		case AirflowHorizontalDirection::RIGHT:
-			dataTX[33]	+= 0b00000100;
-			ESP_LOGD("TCL", "Horizontal fix: righter");
-			break;
-		case AirflowHorizontalDirection::MAX_RIGHT:
-			dataTX[33]	+= 0b00000101;
-			ESP_LOGD("TCL", "Horizontal fix: right");
 			break;
 	}
 
@@ -556,36 +502,6 @@ byte tclacClimate::getChecksum(const byte * message, size_t size) {
 	return crc;
 }
 
-// Мигаем светодиодами
-void tclacClimate::dataShow(bool flow, bool shine) {
-	if (module_display_status_){
-		if (flow == 0){
-			if (shine == 1){
-#ifdef CONF_RX_LED
-				this->rx_led_pin_->digital_write(true);
-#endif
-			} else {
-#ifdef CONF_RX_LED
-				this->rx_led_pin_->digital_write(false);
-#endif
-			}
-		}
-		if (flow == 1) {
-			if (shine == 1){
-#ifdef CONF_TX_LED
-				this->tx_led_pin_->digital_write(true);
-#endif
-			} else {
-#ifdef CONF_TX_LED
-				this->tx_led_pin_->digital_write(false);
-#endif
-			}
-		}
-	}
-}
-
-// Действия с данными из конфига
-
 // Получение состояния пищалки
 void tclacClimate::set_beeper_state(bool state) {
 	this->beeper_status_ = state;
@@ -608,18 +524,7 @@ void tclacClimate::set_display_state(bool state) {
 void tclacClimate::set_force_mode_state(bool state) {
 	this->force_mode_status_ = state;
 }
-// Получение пина светодиода приема данных
-#ifdef CONF_RX_LED
-void tclacClimate::set_rx_led_pin(GPIOPin *rx_led_pin) {
-	this->rx_led_pin_ = rx_led_pin;
-}
-#endif
-// Получение пина светодиода передачи данных
-#ifdef CONF_TX_LED
-void tclacClimate::set_tx_led_pin(GPIOPin *tx_led_pin) {
-	this->tx_led_pin_ = tx_led_pin;
-}
-#endif
+
 // Получение состояния светодиодов связи модуля
 void tclacClimate::set_module_display_state(bool state) {
 	this->module_display_status_ = state;
