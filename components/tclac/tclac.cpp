@@ -28,18 +28,6 @@ ClimateTraits tclacClimate::traits() {
 }
 
 
-void tclacClimate::setup() {
-
-#ifdef CONF_RX_LED
-	this->rx_led_pin_->setup();
-	this->rx_led_pin_->digital_write(false);
-#endif
-#ifdef CONF_TX_LED
-	this->tx_led_pin_->setup();
-	this->tx_led_pin_->digital_write(false);
-#endif
-}
-
 void tclacClimate::loop()  {
 	if (esphome::uart::UARTDevice::available() > 0) {
 		dataShow(0, true);
