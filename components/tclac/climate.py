@@ -89,26 +89,25 @@ AIRFLOW_VERTICAL_DIRECTION_OPTIONS = {
     "MAX_DOWN": AirflowVerticalDirection.MAX_DOWN,
 }
 
-# Проверка конфигурации интерфейса и принятие значений по умолчанию
 def validate_visual(config):
     if CONF_VISUAL in config:
         visual_config = config[CONF_VISUAL]
         if CONF_MIN_TEMPERATURE in visual_config:
             min_temp = visual_config[CONF_MIN_TEMPERATURE]
             if min_temp < TCLAC_MIN_TEMPERATURE:
-                raise cv.Invalid(f"Указанная интерфейсная минимальная температура в {min_temp} ниже допустимой {TCLAC_MIN_TEMPERATURE} для кондиционера")
+                raise cv.Invalid("A temperatura mínima especificada de {min_temp} é inferior à permitida {TCLAC_MIN_TEMPERATURE} para o ar condicionado")
         else:
             config[CONF_VISUAL][CONF_MIN_TEMPERATURE] = TCLAC_MIN_TEMPERATURE
         if CONF_MAX_TEMPERATURE in visual_config:
             max_temp = visual_config[CONF_MAX_TEMPERATURE]
             if max_temp > TCLAC_MAX_TEMPERATURE:
-                raise cv.Invalid(f"Указанная интерфейсная максимальная температура в {max_temp} выше допустимой {TCLAC_MAX_TEMPERATURE} для кондиционера")
+                raise cv.Invalid("A temperatura máxima especificada de {max_temp} é superior à permitida {TCLAC_MAX_TEMPERATURE} para o ar condicionado")
         else:
             config[CONF_VISUAL][CONF_MAX_TEMPERATURE] = TCLAC_MAX_TEMPERATURE
         if CONF_TEMPERATURE_STEP in visual_config:
             temp_step = config[CONF_VISUAL][CONF_TEMPERATURE_STEP][CONF_TARGET_TEMPERATURE]
             if ((int)(temp_step * 2)) / 2 != temp_step:
-                raise cv.Invalid(f"Указанный шаг температуры {temp_step} не корректен, должен быть кратен 1")
+                raise cv.Invalid("O passo de temperatura especificado Temp Step {temp_step} não é correto, deve ser múltiplo de 1")
         else:
             config[CONF_VISUAL][CONF_TEMPERATURE_STEP] = {CONF_TARGET_TEMPERATURE: TCLAC_TARGET_TEMPERATURE_STEP,CONF_CURRENT_TEMPERATURE: TCLAC_CURRENT_TEMPERATURE_STEP,}
     else:
