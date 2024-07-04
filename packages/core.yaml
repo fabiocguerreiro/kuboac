@@ -65,7 +65,6 @@ api:
     key: "${api_key}"
 
 ota:
-- platform: esphome
   password: "${ota_pass}"
 
 wifi:
