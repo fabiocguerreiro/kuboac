@@ -79,18 +79,7 @@ captive_portal:
 
 logger:
   baud_rate: 0
-sensor:
-  - platform: custom
-    lambda: |-
-      auto my_ac = new esphome::tclac::tclacClimate();
-      auto temp_sensor = new sensor::Sensor();
-      my_ac->set_temperature_sensor(temp_sensor);
-      App.register_component(my_ac);
-      return {temp_sensor};
-    sensors:
-      name: "Temperatura Atual AC"
-      unit_of_measurement: "°C"
-      accuracy_decimals: 1
+
 switch:
   - name: Som
     platform: template
