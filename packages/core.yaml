@@ -185,3 +185,9 @@ climate:
   - platform: tclac
     name: "${device_name} Climate"
     id: ${device_name}climate
+
+sensor:
+  - platform: homeassistant
+    id: ac_temp_sensor
+    entity_id: climate.ar_condicionado
+    attribute: current_temperature
