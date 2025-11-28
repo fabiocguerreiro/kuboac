@@ -1,28 +1,14 @@
-﻿from esphome import automation, pins
+from esphome import automation, pins
 import esphome.codegen as cg
 import esphome.config_validation as cv
 from esphome.components import climate, uart
 from esphome.const import (
-    CONF_ID,
-    CONF_LEVEL,
-    CONF_BEEPER,
-    CONF_VISUAL,
-    CONF_MAX_TEMPERATURE,
-    CONF_MIN_TEMPERATURE,
-    CONF_SUPPORTED_MODES,
-    CONF_TEMPERATURE_STEP,
-    CONF_SUPPORTED_PRESETS,
-    CONF_TARGET_TEMPERATURE,
-    CONF_SUPPORTED_FAN_MODES,
-    CONF_SUPPORTED_SWING_MODES,
+    CONF_ID, CONF_BEEPER, CONF_VISUAL, CONF_MAX_TEMPERATURE, CONF_MIN_TEMPERATURE,
+    CONF_SUPPORTED_MODES, CONF_TEMPERATURE_STEP, CONF_SUPPORTED_PRESETS,
+    CONF_TARGET_TEMPERATURE, CONF_SUPPORTED_FAN_MODES, CONF_SUPPORTED_SWING_MODES,
 )
 
-from esphome.components.climate import (
-    ClimateMode,
-    ClimatePreset,
-    ClimateSwingMode,
-    CONF_CURRENT_TEMPERATURE,
-)
+from esphome.components.climate import ClimateMode, ClimatePreset, ClimateSwingMode, CONF_CURRENT_TEMPERATURE
 
 AUTO_LOAD = ["climate"]
 DEPENDENCIES = ["climate", "uart"]
@@ -41,6 +27,7 @@ CONF_VERTICAL_SWING_MODE = "vertical_swing_mode"
 tclac_ns = cg.esphome_ns.namespace("tclac")
 tclacClimate = tclac_ns.class_("tclacClimate", uart.UARTDevice, climate.Climate, cg.PollingComponent)
 
+# Opções de enum
 SUPPORTED_FAN_MODES_OPTIONS = {
     "AUTO": ClimateMode.CLIMATE_FAN_AUTO,
     "QUIET": ClimateMode.CLIMATE_FAN_QUIET,
@@ -73,180 +60,36 @@ SUPPORTED_CLIMATE_PRESETS_OPTIONS = {
 }
 
 VerticalSwingDirection = tclac_ns.enum("VerticalSwingDirection", True)
-VERTICAL_SWING_DIRECTION_OPTIONS = {
-    "UP_DOWN": VerticalSwingDirection.UPDOWN,
-    "UPSIDE": VerticalSwingDirection.UPSIDE,
-    "DOWNSIDE": VerticalSwingDirection.DOWNSIDE,
-}
+VERTICAL_SWING_DIRECTION_OPTIONS = {"UP_DOWN": VerticalSwingDirection.UP_DOWN, "UPSIDE": VerticalSwingDirection.UPSIDE, "DOWNSIDE": VerticalSwingDirection.DOWNSIDE}
 
 AirflowVerticalDirection = tclac_ns.enum("AirflowVerticalDirection", True)
-AIRFLOW_VERTICAL_DIRECTION_OPTIONS = {
-    "LAST": AirflowVerticalDirection.LAST,
-    "MAX_UP": AirflowVerticalDirection.MAX_UP,
-    "UP": AirflowVerticalDirection.UP,
-    "CENTER": AirflowVerticalDirection.CENTER,
-    "DOWN": AirflowVerticalDirection.DOWN,
-    "MAX_DOWN": AirflowVerticalDirection.MAX_DOWN,
-}
+AIRFLOW_VERTICAL_DIRECTION_OPTIONS = {"LAST": AirflowVerticalDirection.LAST, "MAX_UP": AirflowVerticalDirection.MAX_UP, "UP": AirflowVerticalDirection.UP, "CENTER": AirflowVerticalDirection.CENTER, "DOWN": AirflowVerticalDirection.DOWN, "MAX_DOWN": AirflowVerticalDirection.MAX_DOWN}
 
+# Validação visual
 def validate_visual(config):
-    if CONF_VISUAL in config:
-        visual_config = config[CONF_VISUAL]
-        if CONF_MIN_TEMPERATURE in visual_config:
-            min_temp = visual_config[CONF_MIN_TEMPERATURE]
-            if min_temp < TCLAC_MIN_TEMPERATURE:
-                raise cv.Invalid("A temperatura mínima especificada de {min_temp} é inferior à permitida {TCLAC_MIN_TEMPERATURE} para o ar condicionado")
-        else:
-            config[CONF_VISUAL][CONF_MIN_TEMPERATURE] = TCLAC_MIN_TEMPERATURE
-        if CONF_MAX_TEMPERATURE in visual_config:
-            max_temp = visual_config[CONF_MAX_TEMPERATURE]
-            if max_temp > TCLAC_MAX_TEMPERATURE:
-                raise cv.Invalid("A temperatura máxima especificada de {max_temp} é superior à permitida {TCLAC_MAX_TEMPERATURE} para o ar condicionado")
-        else:
-            config[CONF_VISUAL][CONF_MAX_TEMPERATURE] = TCLAC_MAX_TEMPERATURE
-        if CONF_TEMPERATURE_STEP in visual_config:
-            temp_step = config[CONF_VISUAL][CONF_TEMPERATURE_STEP][CONF_TARGET_TEMPERATURE]
-            if ((int)(temp_step * 2)) / 2 != temp_step:
-                raise cv.Invalid("O passo de temperatura especificado Temp Step {temp_step} não é correto, deve ser múltiplo de 1")
-        else:
-            config[CONF_VISUAL][CONF_TEMPERATURE_STEP] = {CONF_TARGET_TEMPERATURE: TCLAC_TARGET_TEMPERATURE_STEP,CONF_CURRENT_TEMPERATURE: TCLAC_CURRENT_TEMPERATURE_STEP,}
-    else:
-        config[CONF_VISUAL] = {CONF_MIN_TEMPERATURE: TCLAC_MIN_TEMPERATURE,CONF_MAX_TEMPERATURE: TCLAC_MAX_TEMPERATURE,CONF_TEMPERATURE_STEP: {CONF_TARGET_TEMPERATURE: TCLAC_TARGET_TEMPERATURE_STEP,CONF_CURRENT_TEMPERATURE: TCLAC_CURRENT_TEMPERATURE_STEP,},}
+    if CONF_VISUAL not in config:
+        config[CONF_VISUAL] = {}
+    visual_config = config[CONF_VISUAL]
+    visual_config.setdefault(CONF_MIN_TEMPERATURE, TCLAC_MIN_TEMPERATURE)
+    visual_config.setdefault(CONF_MAX_TEMPERATURE, TCLAC_MAX_TEMPERATURE)
+    visual_config.setdefault(CONF_TEMPERATURE_STEP, {CONF_TARGET_TEMPERATURE: TCLAC_TARGET_TEMPERATURE_STEP, CONF_CURRENT_TEMPERATURE: TCLAC_CURRENT_TEMPERATURE_STEP})
     return config
 
 CONFIG_SCHEMA = cv.All(
     climate.climate_schema(tclacClimate)
-    .extend(
-        {
-            cv.Optional(CONF_BEEPER, default=True): cv.boolean,
-            cv.Optional(CONF_DISPLAY, default=True): cv.boolean,
-            cv.Optional(CONF_FORCE_MODE, default=True): cv.boolean,
-            cv.Optional(CONF_MODULE_DISPLAY, default=True): cv.boolean,
-            cv.Optional(CONF_VERTICAL_AIRFLOW, default="MAX_UP"): cv.ensure_list(cv.enum(AIRFLOW_VERTICAL_DIRECTION_OPTIONS, upper=True)),
-            cv.Optional(CONF_VERTICAL_SWING_MODE, default="UP_DOWN"): cv.ensure_list(cv.enum(VERTICAL_SWING_DIRECTION_OPTIONS, upper=True)),
-            cv.Optional(CONF_SUPPORTED_PRESETS,default=["NONE","ECO","SLEEP",],): cv.ensure_list(cv.enum(SUPPORTED_CLIMATE_PRESETS_OPTIONS, upper=True)),
-            cv.Optional(CONF_SUPPORTED_SWING_MODES,default=["OFF","VERTICAL",],): cv.ensure_list(cv.enum(SUPPORTED_SWING_MODES_OPTIONS, upper=True)),
-            cv.Optional(CONF_SUPPORTED_MODES,default=["OFF","AUTO","COOL","HEAT","DRY","FAN_ONLY",],): cv.ensure_list(cv.enum(SUPPORTED_CLIMATE_MODES_OPTIONS, upper=True)),
-            cv.Optional(CONF_SUPPORTED_FAN_MODES,default=["AUTO","QUIET","LOW","MIDDLE","MEDIUM","HIGH","FOCUS","DIFFUSE",],): cv.ensure_list(cv.enum(SUPPORTED_FAN_MODES_OPTIONS, upper=True)),
-        }
-    )
+    .extend({
+        cv.Optional(CONF_BEEPER, default=True): cv.boolean,
+        cv.Optional(CONF_DISPLAY, default=True): cv.boolean,
+        cv.Optional(CONF_FORCE_MODE, default=True): cv.boolean,
+        cv.Optional(CONF_MODULE_DISPLAY, default=True): cv.boolean,
+        cv.Optional(CONF_VERTICAL_AIRFLOW, default="MAX_UP"): cv.ensure_list(cv.enum(AIRFLOW_VERTICAL_DIRECTION_OPTIONS, upper=True)),
+        cv.Optional(CONF_VERTICAL_SWING_MODE, default="UP_DOWN"): cv.ensure_list(cv.enum(VERTICAL_SWING_DIRECTION_OPTIONS, upper=True)),
+        cv.Optional(CONF_SUPPORTED_PRESETS, default=["NONE", "ECO", "SLEEP"]): cv.ensure_list(cv.enum(SUPPORTED_CLIMATE_PRESETS_OPTIONS, upper=True)),
+        cv.Optional(CONF_SUPPORTED_SWING_MODES, default=["OFF", "VERTICAL"]): cv.ensure_list(cv.enum(SUPPORTED_SWING_MODES_OPTIONS, upper=True)),
+        cv.Optional(CONF_SUPPORTED_MODES, default=["OFF","AUTO","COOL","HEAT","DRY","FAN_ONLY"]): cv.ensure_list(cv.enum(SUPPORTED_CLIMATE_MODES_OPTIONS, upper=True)),
+        cv.Optional(CONF_SUPPORTED_FAN_MODES, default=["AUTO","QUIET","LOW","MIDDLE","MEDIUM","HIGH","FOCUS","DIFFUSE"]): cv.ensure_list(cv.enum(SUPPORTED_FAN_MODES_OPTIONS, upper=True)),
+    })
     .extend(uart.UART_DEVICE_SCHEMA)
     .extend(cv.COMPONENT_SCHEMA),
     validate_visual,
 )
-
-ForceOnAction = tclac_ns.class_("ForceOnAction", automation.Action)
-ForceOffAction = tclac_ns.class_("ForceOffAction", automation.Action)
-BeeperOnAction = tclac_ns.class_("BeeperOnAction", automation.Action)
-BeeperOffAction = tclac_ns.class_("BeeperOffAction", automation.Action)
-DisplayOnAction = tclac_ns.class_("DisplayOnAction", automation.Action)
-DisplayOffAction = tclac_ns.class_("DisplayOffAction", automation.Action)
-ModuleDisplayOnAction = tclac_ns.class_("ModuleDisplayOnAction", automation.Action)
-VerticalAirflowAction = tclac_ns.class_("VerticalAirflowAction", automation.Action)
-ModuleDisplayOffAction = tclac_ns.class_("ModuleDisplayOffAction", automation.Action)
-VerticalSwingDirectionAction = tclac_ns.class_("VerticalSwingDirectionAction", automation.Action)
-
-TCLAC_ACTION_BASE_SCHEMA = automation.maybe_simple_id({cv.GenerateID(CONF_ID): cv.use_id(tclacClimate),})
-
-@automation.register_action(
-    "climate.tclac.display_on", DisplayOnAction, cv.Schema
-)
-@automation.register_action(
-    "climate.tclac.display_off", DisplayOffAction, cv.Schema
-)
-async def display_action_to_code(config, action_id, template_arg, args):
-    paren = await cg.get_variable(config[CONF_ID])
-    var = cg.new_Pvariable(action_id, template_arg, paren)
-    return var
-
-@automation.register_action(
-    "climate.tclac.beeper_on", BeeperOnAction, cv.Schema
-)
-@automation.register_action(
-    "climate.tclac.beeper_off", BeeperOffAction, cv.Schema
-)
-async def beeper_action_to_code(config, action_id, template_arg, args):
-    paren = await cg.get_variable(config[CONF_ID])
-    var = cg.new_Pvariable(action_id, template_arg, paren)
-    return var
-
-@automation.register_action(
-    "climate.tclac.module_display_on", ModuleDisplayOnAction, cv.Schema
-)
-@automation.register_action(
-    "climate.tclac.module_display_off", ModuleDisplayOffAction, cv.Schema
-)
-async def module_display_action_to_code(config, action_id, template_arg, args):
-    paren = await cg.get_variable(config[CONF_ID])
-    var = cg.new_Pvariable(action_id, template_arg, paren)
-    return var
-    
-@automation.register_action(
-    "climate.tclac.force_mode_on", ForceOnAction, cv.Schema
-)
-@automation.register_action(
-    "climate.tclac.force_mode_off", ForceOffAction, cv.Schema
-)
-async def force_mode_action_to_code(config, action_id, template_arg, args):
-    paren = await cg.get_variable(config[CONF_ID])
-    var = cg.new_Pvariable(action_id, template_arg, paren)
-    return var
-
-@automation.register_action(
-    "climate.tclac.set_vertical_airflow",
-    VerticalAirflowAction,
-    cv.Schema(
-        {
-            cv.GenerateID(): cv.use_id(tclacClimate),
-            cv.Required(CONF_VERTICAL_AIRFLOW): cv.templatable(cv.enum(AIRFLOW_VERTICAL_DIRECTION_OPTIONS, upper=True)),
-        }
-    ),
-)
-async def tclac_set_vertical_airflow_to_code(config, action_id, template_arg, args):
-    paren = await cg.get_variable(config[CONF_ID])
-    var = cg.new_Pvariable(action_id, template_arg, paren)
-    template_ = await cg.templatable(
-        config[CONF_VERTICAL_AIRFLOW], args, AirflowVerticalDirection
-    )
-    cg.add(var.set_direction(template_))
-    return var
-
-@automation.register_action(
-    "climate.tclac.set_vertical_swing_direction",
-    VerticalSwingDirectionAction,
-    cv.Schema(
-        {
-            cv.GenerateID(): cv.use_id(tclacClimate),
-            cv.Required(CONF_VERTICAL_SWING_MODE): cv.templatable(cv.enum(VERTICAL_SWING_DIRECTION_OPTIONS, upper=True)),
-        }
-    ),
-)
-async def tclac_set_vertical_swing_direction_to_code(config, action_id, template_arg, args):
-    paren = await cg.get_variable(config[CONF_ID])
-    var = cg.new_Pvariable(action_id, template_arg, paren)
-    template_ = await cg.templatable(config[CONF_VERTICAL_SWING_MODE], args, VerticalSwingDirection)
-    cg.add(var.set_swing_direction(template_))
-    return var
-
-def to_code(config):
-    var = cg.new_Pvariable(config[CONF_ID])
-    yield cg.register_component(var, config)
-    yield uart.register_uart_device(var, config)
-    yield climate.register_climate(var, config)
-
-    if CONF_BEEPER in config:
-        cg.add(var.set_beeper_state(config[CONF_BEEPER]))
-    if CONF_DISPLAY in config:
-        cg.add(var.set_display_state(config[CONF_DISPLAY]))
-    if CONF_FORCE_MODE in config:
-        cg.add(var.set_force_mode_state(config[CONF_FORCE_MODE]))
-    if CONF_SUPPORTED_MODES in config:
-        cg.add(var.set_supported_modes(config[CONF_SUPPORTED_MODES]))
-    if CONF_SUPPORTED_PRESETS in config:
-        cg.add(var.set_supported_presets(config[CONF_SUPPORTED_PRESETS]))
-    if CONF_MODULE_DISPLAY in config:
-        cg.add(var.set_module_display_state(config[CONF_MODULE_DISPLAY]))
-    if CONF_SUPPORTED_FAN_MODES in config:
-        cg.add(var.set_supported_fan_modes(config[CONF_SUPPORTED_FAN_MODES]))
-    if CONF_SUPPORTED_SWING_MODES in config:
-        cg.add(var.set_supported_swing_modes(config[CONF_SUPPORTED_SWING_MODES]))
