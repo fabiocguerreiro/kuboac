@@ -1,102 +1,39 @@
 #pragma once
 
-#include "esphome/core/automation.h"
-#include "tclac.h"
+#include "tclac.h"  // Certifique-se de incluir, se ainda não estiver, para reconhecer tclacClimate
 
 namespace esphome {
 namespace tclac {
 
-template<typename... Ts> class VerticalAirflowAction : public Action<Ts...> {
- public:
-  VerticalAirflowAction(tclacClimate *parent) : parent_(parent) {}
-  TEMPLATABLE_VALUE(AirflowVerticalDirection, direction)
-  void play(Ts... x) { this->parent_->set_vertical_airflow(this->direction_.value(x...)); }
+// Exemplo de como deve ficar uma declaração de classe com o construtor corrigido:
+template<typename... Ts>
+class VerticalAirflowAction : public Action<Ts...> {
+public:
+  // Corrigido: usando o namespace completo
+  VerticalAirflowAction(esphome::tclac::tclacClimate *parent) : parent_(parent) {}
+  
+  void play(Ts... x) override {
+    this->parent_->set_vertical_airflow(this->direction_.value(x...));
+  }
 
- protected:
-  tclacClimate *parent_;
+protected:
+  // Corrigido: usando o namespace completo
+  esphome::tclac::tclacClimate *parent_;
+  // Outras declarações...
 };
 
-template<typename... Ts> class VerticalSwingDirectionAction : public Action<Ts...> {
- public:
-  VerticalSwingDirectionAction(tclacClimate *parent) : parent_(parent) {}
-  TEMPLATABLE_VALUE(VerticalSwingDirection, direction)
-  void play(Ts... x) { this->parent_->set_vertical_swing_direction(this->direction_.value(x...)); }
-
- protected:
-  tclacClimate *parent_;
+// Faça o mesmo para outras classes de ações que usam esse padrão:
+class VerticalSwingDirectionAction : public Action<> {
+public:
+  VerticalSwingDirectionAction(esphome::tclac::tclacClimate *parent) : parent_(parent) {}
+  void play() override {
+    this->parent_->set_vertical_swing_direction(this->direction_.value());
+  }
+protected:
+  esphome::tclac::tclacClimate *parent_;
 };
 
-template<typename... Ts> class DisplayOnAction : public Action<Ts...> {
- public:
-  DisplayOnAction(tclacClimate *parent) : parent_(parent) {}
-  void play(Ts... x) { this->parent_->set_display_state(true); }
+// Continue ajustando todas as declarações similares dentro do arquivo, trocando 'tclacClimate *parent_' por 'esphome::tclac::tclacClimate *parent_' e o construtor correspondente.
 
- protected:
-  tclacClimate *parent_;
-};
-
-template<typename... Ts> class DisplayOffAction : public Action<Ts...> {
- public:
-  DisplayOffAction(tclacClimate *parent) : parent_(parent) {}
-  void play(Ts... x) { this->parent_->set_display_state(false); }
-
- protected:
-  tclacClimate *parent_;
-};
-
-template<typename... Ts> class BeeperOnAction : public Action<Ts...> {
- public:
-  BeeperOnAction(tclacClimate *parent) : parent_(parent) {}
-  void play(Ts... x) { this->parent_->set_beeper_state(true); }
-
- protected:
-  tclacClimate *parent_;
-};
-
-template<typename... Ts> class BeeperOffAction : public Action<Ts...> {
- public:
-  BeeperOffAction(tclacClimate *parent) : parent_(parent) {}
-  void play(Ts... x) { this->parent_->set_beeper_state(false); }
-
- protected:
-  tclacClimate *parent_;
-};
-
-template<typename... Ts> class ModuleDisplayOnAction : public Action<Ts...> {
- public:
-  ModuleDisplayOnAction(tclacClimate *parent) : parent_(parent) {}
-  void play(Ts... x) { this->parent_->set_module_display_state(true); }
-
- protected:
-  tclacClimate *parent_;
-};
-
-template<typename... Ts> class ModuleDisplayOffAction : public Action<Ts...> {
- public:
-  ModuleDisplayOffAction(tclacClimate *parent) : parent_(parent) {}
-  void play(Ts... x) { this->parent_->set_module_display_state(false); }
-
- protected:
-  tclacClimate *parent_;
-};
-
-template<typename... Ts> class ForceOnAction : public Action<Ts...> {
- public:
-  ForceOnAction(tclacClimate *parent) : parent_(parent) {}
-  void play(Ts... x) { this->parent_->set_force_mode_state(true); }
-
- protected:
-  tclacClimate *parent_;
-};
-
-template<typename... Ts> class ForceOffAction : public Action<Ts...> {
- public:
-  ForceOffAction(tclacClimate *parent) : parent_(parent) {}
-  void play(Ts... x) { this->parent_->set_force_mode_state(false); }
-
- protected:
-  tclacClimate *parent_;
-};
-
-}  // namespace tclac
-}  // namespace esphome
+} // namespace tclac
+} // namespace esphome
