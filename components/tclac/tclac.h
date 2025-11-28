@@ -8,32 +8,32 @@
 namespace esphome {
 namespace tclac {
 
-// --- MACROS e FLAGS ---
-#define SET_TEMP_MASK	0b00001111
-#define MODE_POS		7
-#define MODE_MASK		0b00111111
+// --- MACROS ---
+#define SET_TEMP_MASK 0x0F
+#define MODE_POS 7
+#define MODE_MASK 0x3F
 
-#define MODE_AUTO		0b00110101
-#define MODE_COOL		0b00110001
-#define MODE_DRY		0b00110011
-#define MODE_FAN_ONLY	0b00110010
-#define MODE_HEAT		0b00110100
+#define MODE_AUTO    0x35
+#define MODE_COOL    0x31
+#define MODE_DRY     0x33
+#define MODE_FAN_ONLY 0x32
+#define MODE_HEAT    0x34
 
-#define FAN_SPEED_MASK	0b11110000
-#define FAN_AUTO		0b10000000
-#define FAN_QUIET		0x80
-#define FAN_LOW			0b10010000
-#define FAN_MIDDLE		0b11000000
-#define FAN_MEDIUM		0b10100000
-#define FAN_HIGH		0b11010000
-#define FAN_FOCUS		0b10110000
-#define FAN_DIFFUSE		0b10000000
+#define FAN_SPEED_MASK 0xF0
+#define FAN_AUTO       0x80
+#define FAN_QUIET      0x80
+#define FAN_LOW        0x90
+#define FAN_MIDDLE     0xC0
+#define FAN_MEDIUM     0xA0
+#define FAN_HIGH       0xD0
+#define FAN_FOCUS      0xB0
+#define FAN_DIFFUSE    0x80
 
-#define SWING_MODE_MASK	0b01100000
-#define SWING_OFF			0b00000000
-#define SWING_HORIZONTAL	0b00100000
-#define SWING_VERTICAL		0b01000000
-#define SWING_BOTH			0b01100000
+#define SWING_MODE_MASK 0x60
+#define SWING_OFF      0x00
+#define SWING_HORIZONTAL 0x20
+#define SWING_VERTICAL   0x40
+#define SWING_BOTH       0x60
 
 using climate::ClimateCall;
 using climate::ClimateMode;
@@ -43,46 +43,15 @@ using climate::ClimateFanMode;
 using climate::ClimateSwingMode;
 
 // --- ENUMS ---
-enum class VerticalSwingDirection : uint8_t { UP_DOWN = 0, UPSIDE = 1, DOWNSIDE = 2 };
-enum class HorizontalSwingDirection : uint8_t { LEFT_RIGHT = 0, LEFTSIDE = 1, CENTER = 2, RIGHTSIDE = 3 };
+enum class VerticalSwingDirection : uint8_t { UP_DOWN=0, UPSIDE=1, DOWNSIDE=2 };
+enum class HorizontalSwingDirection : uint8_t { LEFT_RIGHT=0, LEFTSIDE=1, CENTER=2, RIGHTSIDE=3 };
 enum class AirflowVerticalDirection : uint8_t { LAST=0, MAX_UP=1, UP=2, CENTER=3, DOWN=4, MAX_DOWN=5 };
 enum class AirflowHorizontalDirection : uint8_t { LAST=0, MAX_LEFT=1, LEFT=2, CENTER=3, RIGHT=4, MAX_RIGHT=5 };
 
-// --- CLASSE PRINCIPAL ---
+// --- DECLARAÇÃO DA CLASSE ---
 class tclacClimate : public climate::Climate, public esphome::uart::UARTDevice, public PollingComponent {
-private:
-    byte checksum;
-    byte dataTX[38];
-    byte dataRX[61];
-    byte poll[8] = {0xBB,0x00,0x01,0x04,0x02,0x01,0x00,0xBD};
-    
-    bool beeper_status_;
-    bool display_status_;
-    bool force_mode_status_;
-    uint8_t switch_preset = 0;
-    bool module_display_status_;
-    uint8_t switch_fan_mode = 0;
-    uint8_t switch_swing_mode = 0;
-    int target_temperature_set = 0;
-    uint8_t switch_climate_mode = 0;
-    bool allow_take_control = false;
-    ClimateTraits traits_;
-
-protected:
-    GPIOPin *rx_led_pin_;
-    GPIOPin *tx_led_pin_;
-    ClimateTraits traits() override;
-    std::set<ClimateMode> supported_modes_{};
-    std::set<ClimatePreset> supported_presets_{};
-    AirflowVerticalDirection vertical_direction_;
-    std::set<ClimateFanMode> supported_fan_modes_{};
-    AirflowHorizontalDirection horizontal_direction_;
-    VerticalSwingDirection vertical_swing_direction_;
-    std::set<ClimateSwingMode> supported_swing_modes_{};
-    HorizontalSwingDirection horizontal_swing_direction_;
-
 public:
-    tclacClimate() : PollingComponent(5 * 1000), checksum(0) {}
+    tclacClimate();
 
     void readData();
     void takeControl();
@@ -94,7 +63,6 @@ public:
     void set_display_state(bool state);
     void set_force_mode_state(bool state);
     void set_module_display_state(bool state);
-
     void set_rx_led_pin(GPIOPin *rx_led_pin);
     void set_tx_led_pin(GPIOPin *tx_led_pin);
 
@@ -113,6 +81,37 @@ public:
     void set_supported_modes(const std::set<ClimateMode> &modes);
     void set_supported_fan_modes(const std::set<ClimateFanMode> &modes);
     void set_supported_swing_modes(const std::set<ClimateSwingMode> &modes);
+
+protected:
+    byte checksum;
+    byte dataTX[38];
+    byte dataRX[61];
+    byte poll[8];
+
+    bool beeper_status_;
+    bool display_status_;
+    bool force_mode_status_;
+    bool module_display_status_;
+    int target_temperature_set;
+    uint8_t switch_preset;
+    uint8_t switch_fan_mode;
+    uint8_t switch_swing_mode;
+    uint8_t switch_climate_mode;
+    bool allow_take_control;
+
+    ClimateTraits traits_;
+    GPIOPin *rx_led_pin_;
+    GPIOPin *tx_led_pin_;
+
+    std::set<ClimateMode> supported_modes_;
+    std::set<ClimatePreset> supported_presets_;
+    std::set<ClimateFanMode> supported_fan_modes_;
+    std::set<ClimateSwingMode> supported_swing_modes_;
+
+    VerticalSwingDirection vertical_swing_direction_;
+    HorizontalSwingDirection horizontal_swing_direction_;
+    AirflowVerticalDirection vertical_direction_;
+    AirflowHorizontalDirection horizontal_direction_;
 };
 
 }  // namespace tclac
