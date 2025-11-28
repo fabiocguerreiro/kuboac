@@ -1,11 +1,10 @@
 #pragma once
 
 #include "esphome/core/automation.h"
+#include "tclac.h"
 
 namespace esphome {
 namespace tclac {
-
-class tclacClimate;  // forward declaration
 
 template<typename... Ts> class VerticalAirflowAction : public Action<Ts...> {
  public:
@@ -58,6 +57,42 @@ template<typename... Ts> class BeeperOffAction : public Action<Ts...> {
  public:
   BeeperOffAction(tclacClimate *parent) : parent_(parent) {}
   void play(Ts... x) { this->parent_->set_beeper_state(false); }
+
+ protected:
+  tclacClimate *parent_;
+};
+
+template<typename... Ts> class ModuleDisplayOnAction : public Action<Ts...> {
+ public:
+  ModuleDisplayOnAction(tclacClimate *parent) : parent_(parent) {}
+  void play(Ts... x) { this->parent_->set_module_display_state(true); }
+
+ protected:
+  tclacClimate *parent_;
+};
+
+template<typename... Ts> class ModuleDisplayOffAction : public Action<Ts...> {
+ public:
+  ModuleDisplayOffAction(tclacClimate *parent) : parent_(parent) {}
+  void play(Ts... x) { this->parent_->set_module_display_state(false); }
+
+ protected:
+  tclacClimate *parent_;
+};
+
+template<typename... Ts> class ForceOnAction : public Action<Ts...> {
+ public:
+  ForceOnAction(tclacClimate *parent) : parent_(parent) {}
+  void play(Ts... x) { this->parent_->set_force_mode_state(true); }
+
+ protected:
+  tclacClimate *parent_;
+};
+
+template<typename... Ts> class ForceOffAction : public Action<Ts...> {
+ public:
+  ForceOffAction(tclacClimate *parent) : parent_(parent) {}
+  void play(Ts... x) { this->parent_->set_force_mode_state(false); }
 
  protected:
   tclacClimate *parent_;
