@@ -10,6 +10,8 @@ esphome:
   name: ${device_name}
   min_version: 2023.3.0
   friendly_name: ${humanly_name}
+  comment: KUBO KBAC8702 - 12000 BTU
+
   on_boot:
     priority: -100
     then:
