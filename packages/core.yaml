@@ -54,9 +54,9 @@ esphome:
           id(${device_name}climate).set_vertical_airflow(esphome::tclac::AirflowVerticalDirection::MAX_DOWN);
         }
 
-        // Correção para o modo de ventilação:
+        // Garante que o Ar Condicionado tem um modo de ventilação definido ao iniciar
         auto call = id(${device_name}climate).make_call();
-        call.set_fan_mode(climate::CLIMATE_FAN_AUTO);
+        call.set_fan_mode(CLIMATE_FAN_AUTO);
         call.perform();
 
 uart:
@@ -193,6 +193,13 @@ climate:
   - platform: tclac
     name: "${device_name} Climate"
     id: ${device_name}climate
+    # Adicionado para evitar que o estado se perca
+    control_parameters:
+      restore_mode: RESTORE_DEFAULT_ON
+    visual:
+      min_temperature: 16
+      max_temperature: 31
+      temperature_step: 1
 
 sensor:
   - platform: homeassistant
