@@ -42,7 +42,9 @@ namespace tclac {
 
 #define SWING_POS			10
 #define SWING_OFF			0b00000000
+#define SWING_HORIZONTAL	0b00100000
 #define SWING_VERTICAL		0b01000000
+#define SWING_BOTH			0b01100000
 #define SWING_MODE_MASK		0b01100000
 
 using climate::ClimateCall;
@@ -130,6 +132,7 @@ class tclacClimate : public climate::Climate, public esphome::uart::UARTDevice, 
 		void set_vertical_airflow(AirflowVerticalDirection direction);
 		void set_horizontal_airflow(AirflowHorizontalDirection direction);
 		void set_vertical_swing_direction(VerticalSwingDirection direction);
+		void set_horizontal_swing_direction(HorizontalSwingDirection direction);
 		void set_supported_presets(climate::ClimatePresetMask presets);
 		void set_supported_modes(climate::ClimateModeMask modes);
 		void set_supported_fan_modes(climate::ClimateFanModeMask modes);
