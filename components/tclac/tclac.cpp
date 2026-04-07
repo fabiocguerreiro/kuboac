@@ -127,9 +127,7 @@ void tclacClimate::readData() {
 
 		switch (swingmodeswitch) {
 			case SWING_OFF: swing_mode = climate::CLIMATE_SWING_OFF; break;
-			case SWING_HORIZONTAL: swing_mode = climate::CLIMATE_SWING_HORIZONTAL; break;
 			case SWING_VERTICAL: swing_mode = climate::CLIMATE_SWING_VERTICAL; break;
-			case SWING_BOTH: swing_mode = climate::CLIMATE_SWING_BOTH; break;
 		}
 		
 		preset = ClimatePreset::CLIMATE_PRESET_NONE;
