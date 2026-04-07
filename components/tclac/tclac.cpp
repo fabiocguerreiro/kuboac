@@ -8,11 +8,10 @@ namespace tclac{
 ClimateTraits tclacClimate::traits() {
     auto traits = climate::ClimateTraits();
 
-    // 1. Funcionalidades básicas
+    // 1. Apenas a temperatura atual
     traits.add_feature_flags(climate::CLIMATE_SUPPORTS_CURRENT_TEMPERATURE);
-    traits.add_feature_flags(climate::CLIMATE_SUPPORTS_TARGET_TEMPERATURE);
 
-    // 2. Modos Suportados (Sem AUTO)
+    // 2. Modos Suportados (AUTO REMOVIDO)
     traits.set_supported_modes({
         climate::CLIMATE_MODE_OFF,
         climate::CLIMATE_MODE_COOL,
@@ -21,14 +20,14 @@ ClimateTraits tclacClimate::traits() {
         climate::CLIMATE_MODE_FAN_ONLY
     });
 
-    // 3. Ventilação - Ajustada para o teu caso
+    // 3. Ventilação (Ajustada: Diffuse = Turbo)
     traits.set_supported_fan_modes({
         climate::CLIMATE_FAN_AUTO,
         climate::CLIMATE_FAN_QUIET,
         climate::CLIMATE_FAN_LOW,
         climate::CLIMATE_FAN_MEDIUM,
         climate::CLIMATE_FAN_HIGH,
-        climate::CLIMATE_FAN_DIFFUSE   // Este é o teu TURBO
+        climate::CLIMATE_FAN_DIFFUSE
     });
 
     // 4. Swing (Apenas Vertical)
