@@ -285,14 +285,6 @@ void tclacClimate::takeControl() {
 			dataTX[10]	+= 0b00111000;
 			dataTX[11]	+= 0b00000000;
 			break;
-		case climate::CLIMATE_SWING_HORIZONTAL:
-			dataTX[10]	+= 0b00000000;
-			dataTX[11]	+= 0b00001000;
-			break;
-		case climate::CLIMATE_SWING_BOTH:
-			dataTX[10]	+= 0b00111000;
-			dataTX[11]	+= 0b00001000;  
-			break;
 	}
 	
 	switch(switch_preset) {
@@ -307,12 +299,6 @@ void tclacClimate::takeControl() {
 		case VerticalSwingDirection::UPSIDE: dataTX[32] += 0b00010000; break;
 		case VerticalSwingDirection::DOWNSIDE: dataTX[32] += 0b00011000; break;
 	}
-	switch(horizontal_swing_direction_) {
-		case HorizontalSwingDirection::LEFT_RIGHT: dataTX[33] += 0b00001000; break;
-		case HorizontalSwingDirection::LEFTSIDE: dataTX[33] += 0b00010000; break;
-		case HorizontalSwingDirection::CENTER: dataTX[33] += 0b00011000; break;
-		case HorizontalSwingDirection::RIGHTSIDE: dataTX[33] += 0b00100000; break;
-	}
 	switch(vertical_direction_) {
 		case AirflowVerticalDirection::LAST: dataTX[32] += 0b00000000; break;
 		case AirflowVerticalDirection::MAX_UP: dataTX[32] += 0b00000001; break;
@@ -320,14 +306,6 @@ void tclacClimate::takeControl() {
 		case AirflowVerticalDirection::CENTER: dataTX[32] += 0b00000011; break;
 		case AirflowVerticalDirection::DOWN: dataTX[32] += 0b00000100; break;
 		case AirflowVerticalDirection::MAX_DOWN: dataTX[32] += 0b00000101; break;
-	}
-	switch(horizontal_direction_) {
-		case AirflowHorizontalDirection::LAST: dataTX[33] += 0b00000000; break;
-		case AirflowHorizontalDirection::MAX_LEFT: dataTX[33] += 0b00000001; break;
-		case AirflowHorizontalDirection::LEFT: dataTX[33] += 0b00000010; break;
-		case AirflowHorizontalDirection::CENTER: dataTX[33] += 0b00000011; break;
-		case AirflowHorizontalDirection::RIGHT: dataTX[33] += 0b00000100; break;
-		case AirflowHorizontalDirection::MAX_RIGHT: dataTX[33] += 0b00000101; break;
 	}
 
 	dataTX[9] = target_temperature_set;
@@ -447,20 +425,12 @@ void tclacClimate::set_vertical_airflow(AirflowVerticalDirection direction) {
 	this->vertical_direction_ = direction;
 	if (force_mode_status_ && allow_take_control) tclacClimate::takeControl();
 }
-void tclacClimate::set_horizontal_airflow(AirflowHorizontalDirection direction) {
-	this->horizontal_direction_ = direction;
-	if (force_mode_status_ && allow_take_control) tclacClimate::takeControl();
-}
 void tclacClimate::set_vertical_swing_direction(VerticalSwingDirection direction) {
 	this->vertical_swing_direction_ = direction;
 	if (force_mode_status_ && allow_take_control) tclacClimate::takeControl();
 }
 void tclacClimate::set_supported_modes(climate::ClimateModeMask modes) {
 	this->supported_modes_ = modes;
-}
-void tclacClimate::set_horizontal_swing_direction(HorizontalSwingDirection direction) {
-	horizontal_swing_direction_ = direction;
-	if (force_mode_status_ && allow_take_control) tclacClimate::takeControl();
 }
 void tclacClimate::set_supported_fan_modes(climate::ClimateFanModeMask modes){
 	this->supported_fan_modes_ = modes;
