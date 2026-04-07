@@ -11,22 +11,21 @@
 namespace esphome{
 namespace tclac{
 
-
 ClimateTraits tclacClimate::traits() {
     auto traits = climate::ClimateTraits();
 
-    // Esta linha garante que a temperatura atual aparece
+    // Reporta a temperatura atual (o que já tinhas)
     traits.add_feature_flags(climate::CLIMATE_SUPPORTS_CURRENT_TEMPERATURE); 
     
-    // === AQUI ESTÁ O TRUQUE PARA O MODO AUTO ===
-    // Esta flag força o Home Assistant a mostrar o seletor de temperatura 
-    // mesmo quando o modo não é Cool ou Heat.
-    traits.add_feature_flags(climate::CLIMATE_SUPPORTS_TARGET_TEMPERATURE);
+    // === A SOLUÇÃO PARA O MODO AUTO ===
+    // Dizemos ao ESPHome que este AC suporta apenas UM ponto de temperatura 
+    // (e não um range min/max), o que força a barra de temperatura a aparecer.
+    traits.set_supports_two_point_target_temperature(false);
 
     traits.set_supported_modes(this->supported_modes_);
     traits.set_supported_presets(this->supported_presets_);
     
-    // Mantendo a limpeza do Swing que falamos antes:
+    // Mantendo a limpeza do Swing (apenas Vertical e Off)
     traits.add_supported_swing_mode(climate::CLIMATE_SWING_OFF);
     traits.add_supported_swing_mode(climate::CLIMATE_SWING_VERTICAL);
     
