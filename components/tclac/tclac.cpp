@@ -14,23 +14,23 @@ namespace tclac{
 ClimateTraits tclacClimate::traits() {
     auto traits = climate::ClimateTraits();
 
-    // Reporta a temperatura atual (o que já tinhas)
+    // 1. Temperatura Atual
     traits.add_feature_flags(climate::CLIMATE_SUPPORTS_CURRENT_TEMPERATURE); 
     
-    // === A SOLUÇÃO PARA O MODO AUTO ===
-    // Dizemos ao ESPHome que este AC suporta apenas UM ponto de temperatura 
-    // (e não um range min/max), o que força a barra de temperatura a aparecer.
-    traits.set_supports_two_point_target_temperature(false);
+    // 2. FORÇAR Seletor de Temperatura (Substitui o método antigo que deu warning)
+    // Nas versões novas, usamos a flag de TARGET_TEMPERATURE
+    traits.add_feature_flags(climate::CLIMATE_SUPPORTS_TARGET_TEMPERATURE);
 
     traits.set_supported_modes(this->supported_modes_);
     traits.set_supported_presets(this->supported_presets_);
     
-    // Mantendo a limpeza do Swing (apenas Vertical e Off)
+    // 3. Limpeza do Swing (Vertical apenas)
     traits.add_supported_swing_mode(climate::CLIMATE_SWING_OFF);
     traits.add_supported_swing_mode(climate::CLIMATE_SWING_VERTICAL);
     
     traits.set_supported_fan_modes(this->supported_fan_modes_);
     
+    // 4. Modos Base
     traits.add_supported_mode(climate::CLIMATE_MODE_OFF);
     traits.add_supported_mode(climate::CLIMATE_MODE_AUTO);
     traits.add_supported_fan_mode(climate::CLIMATE_FAN_AUTO);
