@@ -33,10 +33,8 @@ ClimateTraits tclacClimate::traits() {
 
 
 void tclacClimate::setup() {
-    // === CORREÇÃO: Inicialização de estados para evitar valores nulos ===
-    if (!this->mode.has_value()) {
-        this->mode = climate::CLIMATE_MODE_OFF;
-    }
+    // === CORREÇÃO: Inicialização de estados sem usar .has_value() em Enums ===
+    // mode e swing_mode são enums diretos, fan_mode é opcional
     if (!this->fan_mode.has_value()) {
         this->fan_mode = climate::CLIMATE_FAN_AUTO;
     }
@@ -145,7 +143,6 @@ void tclacClimate::readData() {
 		
 	} else {
 		mode = climate::CLIMATE_MODE_OFF;
-		// Manter a ventoinha no último estado ou Auto em vez de null
 		if (!fan_mode.has_value()) fan_mode = climate::CLIMATE_FAN_AUTO;
 		swing_mode = climate::CLIMATE_SWING_OFF;
 		preset = ClimatePreset::CLIMATE_PRESET_NONE;
@@ -155,10 +152,11 @@ void tclacClimate::readData() {
 }
 
 void tclacClimate::control(const ClimateCall &call) {
+    // CORREÇÃO: mode e swing_mode não são opcionais nesta classe base
 	if (call.get_mode().has_value()){
 		switch_climate_mode = call.get_mode().value();
 	} else {
-		switch_climate_mode = mode.value_or(climate::CLIMATE_MODE_OFF);
+		switch_climate_mode = mode; 
 	}
 	
 	if (call.get_preset().has_value()){
@@ -176,7 +174,7 @@ void tclacClimate::control(const ClimateCall &call) {
 	if (call.get_swing_mode().has_value()){
 		switch_swing_mode = call.get_swing_mode().value();
 	} else {
-		switch_swing_mode = swing_mode.value_or(climate::CLIMATE_SWING_OFF);
+		switch_swing_mode = swing_mode;
 	}
 	
 	if (call.get_target_temperature().has_value()) {
@@ -204,10 +202,10 @@ void tclacClimate::takeControl() {
 	dataTX[33] = 0b00000000;
 	
 	if (is_call_control != true){
-		switch_climate_mode = mode.value_or(climate::CLIMATE_MODE_OFF);
+		switch_climate_mode = mode;
 		switch_preset = preset.value_or(ClimatePreset::CLIMATE_PRESET_NONE);
 		switch_fan_mode = fan_mode.value_or(climate::CLIMATE_FAN_AUTO);
-		switch_swing_mode = swing_mode.value_or(climate::CLIMATE_SWING_OFF);
+		switch_swing_mode = swing_mode;
 		float temp = std::isnan(target_temperature) ? 18.0f : target_temperature;
 		target_temperature_set = 31-(int)temp;
 	}
