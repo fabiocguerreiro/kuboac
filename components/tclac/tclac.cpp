@@ -10,6 +10,8 @@ ClimateTraits tclacClimate::traits() {
 
     // 1. Apenas a temperatura atual
     traits.add_feature_flags(climate::CLIMATE_SUPPORTS_CURRENT_TEMPERATURE);
+	traits.add_feature_flags(climate::CLIMATE_SUPPORTS_CURRENT_HUMIDITY);
+	
 
     // 2. Modos Suportados (AUTO REMOVIDO)
     traits.set_supported_modes({
