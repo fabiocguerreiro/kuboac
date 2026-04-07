@@ -14,26 +14,33 @@ namespace tclac{
 ClimateTraits tclacClimate::traits() {
     auto traits = climate::ClimateTraits();
 
-    // 1. Temperatura Atual
-    traits.add_feature_flags(climate::CLIMATE_SUPPORTS_CURRENT_TEMPERATURE); 
+    // 1. Temperatura atual (funciona sempre)
+    traits.set_supports_current_temperature(true);
     
-    // 2. FORÇAR Seletor de Temperatura (Substitui o método antigo que deu warning)
-    // Nas versões novas, usamos a flag de TARGET_TEMPERATURE
-    traits.add_feature_flags(climate::CLIMATE_SUPPORTS_TARGET_TEMPERATURE);
+    // 2. A SOLUÇÃO DEFINITIVA: 
+    // Em vez de add_feature_flags, vamos usar o set direto que define a temperatura alvo.
+    // Isto é o que o ESPHome usa internamente quando chamas as flags.
+    traits.set_supports_two_point_target_temperature(false); 
 
+    // 3. Modos Suportados
     traits.set_supported_modes(this->supported_modes_);
-    traits.set_supported_presets(this->supported_presets_);
-    
-    // 3. Limpeza do Swing (Vertical apenas)
-    traits.add_supported_swing_mode(climate::CLIMATE_SWING_OFF);
-    traits.add_supported_swing_mode(climate::CLIMATE_SWING_VERTICAL);
-    
-    traits.set_supported_fan_modes(this->supported_fan_modes_);
-    
-    // 4. Modos Base
     traits.add_supported_mode(climate::CLIMATE_MODE_OFF);
     traits.add_supported_mode(climate::CLIMATE_MODE_AUTO);
+    traits.add_supported_mode(climate::CLIMATE_MODE_COOL);
+    traits.add_supported_mode(climate::CLIMATE_MODE_HEAT);
+    traits.add_supported_mode(climate::CLIMATE_MODE_DRY);
+    traits.add_supported_mode(climate::CLIMATE_MODE_FAN_ONLY);
+
+    // 4. Fan Modes
+    traits.set_supported_fan_modes(this->supported_fan_modes_);
     traits.add_supported_fan_mode(climate::CLIMATE_FAN_AUTO);
+
+    // 5. Swing Modes (Apenas Vertical e Off como pediste)
+    traits.add_supported_swing_mode(climate::CLIMATE_SWING_OFF);
+    traits.add_supported_swing_mode(climate::CLIMATE_SWING_VERTICAL);
+
+    // 6. Presets
+    traits.set_supported_presets(this->supported_presets_);
     traits.add_supported_preset(ClimatePreset::CLIMATE_PRESET_NONE);
 
     return traits;
