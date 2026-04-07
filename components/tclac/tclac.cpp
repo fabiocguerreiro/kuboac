@@ -15,46 +15,28 @@ namespace tclac{
 ClimateTraits tclacClimate::traits() {
     auto traits = climate::ClimateTraits();
 
-    // 1. Ativar as funcionalidades usando o novo sistema de Flags (2026)
-    // Isto substitui os métodos "set_supports..." que deram aviso
-    traits.add_feature_flags(climate::CLIMATE_SUPPORTS_CURRENT_TEMPERATURE);
-    traits.add_feature_flags(climate::CLIMATE_SUPPORTS_TARGET_TEMPERATURE);
+    traits.add_feature_flags(climate::CLIMATE_SUPPORTS_CURRENT_TEMPERATURE); 
 
-    // 2. Definir os modos explicitamente
-    traits.set_supported_modes({
-        climate::CLIMATE_MODE_OFF,
-        climate::CLIMATE_MODE_AUTO,
-        climate::CLIMATE_MODE_COOL,
-        climate::CLIMATE_MODE_HEAT,
-        climate::CLIMATE_MODE_DRY,
-        climate::CLIMATE_MODE_FAN_ONLY
-    });
-
-    // 3. Fan Modes
-    traits.set_supported_fan_modes({
-        climate::CLIMATE_FAN_AUTO,
-        climate::CLIMATE_FAN_LOW,
-        climate::CLIMATE_FAN_MEDIUM,
-        climate::CLIMATE_FAN_HIGH,
-        climate::CLIMATE_FAN_QUIET,
-        climate::CLIMATE_FAN_MIDDLE,
-        climate::CLIMATE_FAN_FOCUS,
-        climate::CLIMATE_FAN_DIFFUSE
-    });
-
-    // 4. Swing Modes (Apenas Vertical e Off)
-    traits.set_supported_swing_modes({
-        climate::CLIMATE_SWING_OFF,
-        climate::CLIMATE_SWING_VERTICAL
-    });
-
-    // 5. Presets
-    traits.set_supported_presets({
-        climate::CLIMATE_PRESET_NONE,
-        climate::CLIMATE_PRESET_ECO,
-        climate::CLIMATE_PRESET_SLEEP,
-        climate::CLIMATE_PRESET_COMFORT
-    });
+    traits.set_supported_modes(this->supported_modes_);
+    traits.set_supported_presets(this->supported_presets_);
+    
+    // === ALTERAÇÃO AQUI: Filtrar os modos de Swing ===
+    // Em vez de usar this->supported_swing_modes_, vamos definir manualmente
+    // apenas o que o teu AC suporta.
+    traits.add_supported_swing_mode(climate::CLIMATE_SWING_OFF);
+    traits.add_supported_swing_mode(climate::CLIMATE_SWING_VERTICAL); // Mantemos apenas o vertical
+    
+    // Removemos ou comentamos as linhas que adicionam suporte genérico
+    // traits.set_supported_swing_modes(this->supported_swing_modes_); // <--- Remover/Comentar esta
+    
+    traits.set_supported_fan_modes(this->supported_fan_modes_);
+    
+    traits.add_supported_mode(climate::CLIMATE_MODE_OFF);
+    traits.add_supported_mode(climate::CLIMATE_MODE_AUTO);
+    traits.add_supported_fan_mode(climate::CLIMATE_FAN_AUTO);
+    
+    // traits.add_supported_swing_mode(climate::CLIMATE_SWING_OFF); // Já adicionado acima
+    traits.add_supported_preset(ClimatePreset::CLIMATE_PRESET_NONE);
 
     return traits;
 }
