@@ -80,8 +80,8 @@ wifi:
 
 captive_portal:
 
-logger:
-  baud_rate: 0
+#logger:
+#  baud_rate: 0
 
 switch:
   - name: Som
