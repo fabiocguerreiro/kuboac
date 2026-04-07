@@ -15,27 +15,26 @@ namespace tclac{
 ClimateTraits tclacClimate::traits() {
     auto traits = climate::ClimateTraits();
 
+    // Esta linha garante que a temperatura atual aparece
     traits.add_feature_flags(climate::CLIMATE_SUPPORTS_CURRENT_TEMPERATURE); 
+    
+    // === AQUI ESTÁ O TRUQUE PARA O MODO AUTO ===
+    // Esta flag força o Home Assistant a mostrar o seletor de temperatura 
+    // mesmo quando o modo não é Cool ou Heat.
+    traits.add_feature_flags(climate::CLIMATE_SUPPORTS_TARGET_TEMPERATURE);
 
     traits.set_supported_modes(this->supported_modes_);
     traits.set_supported_presets(this->supported_presets_);
     
-    // === ALTERAÇÃO AQUI: Filtrar os modos de Swing ===
-    // Em vez de usar this->supported_swing_modes_, vamos definir manualmente
-    // apenas o que o teu AC suporta.
+    // Mantendo a limpeza do Swing que falamos antes:
     traits.add_supported_swing_mode(climate::CLIMATE_SWING_OFF);
-    traits.add_supported_swing_mode(climate::CLIMATE_SWING_VERTICAL); // Mantemos apenas o vertical
-    
-    // Removemos ou comentamos as linhas que adicionam suporte genérico
-    // traits.set_supported_swing_modes(this->supported_swing_modes_); // <--- Remover/Comentar esta
+    traits.add_supported_swing_mode(climate::CLIMATE_SWING_VERTICAL);
     
     traits.set_supported_fan_modes(this->supported_fan_modes_);
     
     traits.add_supported_mode(climate::CLIMATE_MODE_OFF);
     traits.add_supported_mode(climate::CLIMATE_MODE_AUTO);
     traits.add_supported_fan_mode(climate::CLIMATE_FAN_AUTO);
-    
-    // traits.add_supported_swing_mode(climate::CLIMATE_SWING_OFF); // Já adicionado acima
     traits.add_supported_preset(ClimatePreset::CLIMATE_PRESET_NONE);
 
     return traits;
