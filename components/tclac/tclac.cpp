@@ -11,14 +11,14 @@
 namespace esphome{
 namespace tclac{
 
-
 ClimateTraits tclacClimate::traits() {
     auto traits = climate::ClimateTraits();
 
-    // 1. Funcionalidades básicas (Temperatura atual)
+    // 1. Funcionalidades básicas
     traits.add_feature_flags(climate::CLIMATE_SUPPORTS_CURRENT_TEMPERATURE);
+    traits.add_feature_flags(climate::CLIMATE_SUPPORTS_TARGET_TEMPERATURE);
 
-    // 2. Modos Suportados (AUTO REMOVIDO DAQUI)
+    // 2. Modos Suportados (Sem AUTO)
     traits.set_supported_modes({
         climate::CLIMATE_MODE_OFF,
         climate::CLIMATE_MODE_COOL,
@@ -27,17 +27,17 @@ ClimateTraits tclacClimate::traits() {
         climate::CLIMATE_MODE_FAN_ONLY
     });
 
-    // 3. Velocidades da Ventoinha
-    // Se o teu AC não suportar alguma destas, podes remover da lista abaixo
+    // 3. Ventilação - Ajustada para o teu caso
     traits.set_supported_fan_modes({
         climate::CLIMATE_FAN_AUTO,
+        climate::CLIMATE_FAN_QUIET,
         climate::CLIMATE_FAN_LOW,
         climate::CLIMATE_FAN_MEDIUM,
         climate::CLIMATE_FAN_HIGH,
-        climate::CLIMATE_FAN_QUIET
+        climate::CLIMATE_FAN_DIFFUSE   // Este é o teu TURBO
     });
 
-    // 4. Swing (APENAS VERTICAL E OFF)
+    // 4. Swing (Apenas Vertical)
     traits.set_supported_swing_modes({
         climate::CLIMATE_SWING_OFF,
         climate::CLIMATE_SWING_VERTICAL
@@ -53,7 +53,6 @@ ClimateTraits tclacClimate::traits() {
 
     return traits;
 }
-
 
 void tclacClimate::setup() {
     // === CORREÇÃO: Inicialização de estados sem usar .has_value() em Enums ===
